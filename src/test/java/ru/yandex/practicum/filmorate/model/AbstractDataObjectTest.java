@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -91,10 +90,7 @@ public abstract class AbstractDataObjectTest<T extends DataObject> implements Da
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         Set<ConstraintViolation<T>> violations = validator.validate(object);
-        for (ConstraintViolation<T> violation : violations) {
-            return false;
-        }
-        return true;
+        return violations.isEmpty();
     }
 
     private List<Path> getPathList(String dir) {
