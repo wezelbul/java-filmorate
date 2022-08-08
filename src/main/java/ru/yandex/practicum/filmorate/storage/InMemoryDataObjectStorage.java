@@ -13,7 +13,7 @@ import java.util.Map;
 public class InMemoryDataObjectStorage<T extends DataObject> implements DataObjectStorage<T> {
 
     protected final Map<Long, T> objects = new HashMap<>();
-    protected Long idCounter = 0L;
+    protected Long idCounter = 1L;
 
     @Override
     public Collection<T> getAll() {
@@ -36,12 +36,12 @@ public class InMemoryDataObjectStorage<T extends DataObject> implements DataObje
 
     private Long manageAssignId(T object) {
         if (object.getId() == null) {
-            if (idCounter != 0L && objects.containsKey(idCounter)) {
-                while (objects.containsKey(++idCounter)) { }
-                return idCounter;
-            } else {
-                return ++idCounter;
+            if (idCounter != 1L || objects.containsKey(idCounter)) {
+                while (objects.containsKey(idCounter)) {
+                    ++idCounter;
+                }
             }
+            return idCounter;
         } else {
             if (object.getId() > 0) {
                 return object.getId();
