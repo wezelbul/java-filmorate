@@ -8,6 +8,8 @@ public interface DataObjectService<T extends DataObject> {
 
     Collection<T> getAll();
 
+    boolean contains(Long id);
+
     T add(T object);
 
     T update(T object);
