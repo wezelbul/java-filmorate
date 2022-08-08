@@ -15,11 +15,6 @@ import java.util.Collection;
 public class FilmController extends AbstractDataObjectController<Film> {
 
     @Override
-    protected DataObjectService<Film> getService() {
-        return new FilmService();
-    }
-
-    @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Film> create(@Valid @RequestBody Film film) {
@@ -36,6 +31,11 @@ public class FilmController extends AbstractDataObjectController<Film> {
     @PutMapping
     public ResponseEntity<Film> update(@Valid @RequestBody Film film) {
         return super.update(film);
+    }
+
+    @Override
+    protected DataObjectService<Film> getService() {
+        return new FilmService();
     }
 
 }
