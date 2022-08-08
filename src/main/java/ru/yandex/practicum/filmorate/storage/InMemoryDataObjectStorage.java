@@ -30,7 +30,8 @@ public class InMemoryDataObjectStorage<T extends DataObject> implements DataObje
 
     @Override
     public T update(@Valid T object) {
-        objects.put(manageAssignId(object), object);
+        object.setId(manageAssignId(object));
+        objects.put(object.getId(), object);
         return objects.get(object.getId());
     }
 
