@@ -6,8 +6,9 @@ import java.util.Collection;
 
 public interface DataObjectStorage<T extends DataObject> {
 
-
     Collection<T> getAll();
+
+    boolean contains(Long id);
 
     T add(T object);
 

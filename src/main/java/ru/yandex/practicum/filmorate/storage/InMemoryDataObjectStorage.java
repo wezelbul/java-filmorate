@@ -34,6 +34,11 @@ public class InMemoryDataObjectStorage<T extends DataObject> implements DataObje
         return objects.get(object.getId());
     }
 
+    @Override
+    public boolean contains(Long id) {
+        return objects.containsKey(id);
+    }
+
     private Long manageAssignId(T object) {
         if (object.getId() == null) {
             if (idCounter != 1L || objects.containsKey(idCounter)) {
