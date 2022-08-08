@@ -12,6 +12,8 @@ public abstract class AbstractDataObjectService<T extends DataObject> implements
 
     protected final DataObjectStorage<T> objectStorage = new InMemoryDataObjectStorage<>();
 
+    protected abstract Class<T> getClassType();
+
     @Override
     public Collection<T> getAll() {
         return objectStorage.getAll();
