@@ -1,27 +1,37 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.base.data;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.model.DataModel;
 import ru.yandex.practicum.filmorate.exception.DataObjectNotFoundException;
-import ru.yandex.practicum.filmorate.model.DataObject;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import javax.validation.constraints.Positive;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class InMemoryDataObjectStorage<T extends DataObject> implements DataObjectStorage<T> {
+public abstract class InMemoryDataStorage<Model extends DataModel> implements DataStorage<Model> {
 
-    protected final Map<Long, T> objects = new HashMap<>();
+    protected final Map<Long, Model> objects = new HashMap<>();
     protected Long idCounter = 1L;
 
     @Override
-    public Collection<T> getAll() {
-        return objects.values();
+    public List<Model> getAll() {
+        return List.copyOf(objects.values());
     }
 
     @Override
-    public T add(@Valid T object) {
+    public Model getById(@Positive Long id) {
+        if (contains(id)) {
+            return objects.get(id);
+        } else {
+            throw new DataObjectNotFoundException(id);
+        }
+    }
+
+    @Override
+    public Model add(@Valid Model object) {
         object.setId(null);
         object.setId(manageAssignId(object));
         objects.put(object.getId(), object);
@@ -29,18 +39,18 @@ public class InMemoryDataObjectStorage<T extends DataObject> implements DataObje
     }
 
     @Override
-    public T update(@Valid T object) {
+    public Model update(@Valid Model object) {
         object.setId(manageAssignId(object));
         objects.put(object.getId(), object);
         return objects.get(object.getId());
     }
 
     @Override
-    public boolean contains(Long id) {
+    public boolean contains(@Positive Long id) {
         return objects.containsKey(id);
     }
 
-    private Long manageAssignId(T object) {
+    private Long manageAssignId(Model object) {
         if (object.getId() == null) {
             if (idCounter != 1L || objects.containsKey(idCounter)) {
                 while (objects.containsKey(idCounter)) {
