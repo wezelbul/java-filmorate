@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.friend;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.storage.base.link.InMemoryLinkStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
-@Component
+@Repository
 public class InMemoryFriendStorage extends InMemoryLinkStorage {
 
     public InMemoryFriendStorage(InMemoryUserStorage storage) {
