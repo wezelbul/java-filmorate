@@ -4,15 +4,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.DataObjectService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
-public class FilmController extends AbstractDataObjectController<Film> {
+public class FilmController extends AbstractDataController<Film, FilmService> {
+
+    public FilmController(FilmService service) {
+        super(service);
+    }
 
     @Override
     @PostMapping
@@ -23,8 +28,14 @@ public class FilmController extends AbstractDataObjectController<Film> {
 
     @Override
     @GetMapping
-    public ResponseEntity<Collection<Film>> read() {
+    public ResponseEntity<List<Film>> read() {
         return super.read();
+    }
+
+    @Override
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<Film> read(@Valid @PathVariable Long id) {
+        return super.read(id);
     }
 
     @Override
@@ -33,9 +44,19 @@ public class FilmController extends AbstractDataObjectController<Film> {
         return super.update(film);
     }
 
-    @Override
-    protected DataObjectService<Film> getService() {
-        return new FilmService();
+    @PutMapping(value = "/{id}/like/{userId}")
+    public Map<String, Boolean> addLike(@Valid @PathVariable Long id, @Valid @PathVariable Long userId) {
+        return Map.of("completed", service.addLike(id, userId));
+    }
+
+    @DeleteMapping(value = "/{id}/like/{userId}")
+    public Map<String, Boolean> deleteLike(@Valid @PathVariable Long id, @Valid @PathVariable Long userId) {
+        return Map.of("completed", service.deleteLike(id, userId));
+    }
+
+    @GetMapping(value = "/popular")
+    public ResponseEntity<List<Film>> getMostPopularFilms(@Valid @RequestParam(required = false) Integer count) {
+        return ResponseEntity.ok(service.getMostPopularFilms(count));
     }
 
 }

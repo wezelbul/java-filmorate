@@ -3,19 +3,23 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.DataObjectService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/users")
-public class UserController extends AbstractDataObjectController<User> {
+public class UserController extends AbstractDataController<User, UserService> {
+
+    public UserController(UserService service) {
+        super(service);
+    }
 
     @Override
     @PostMapping(produces = APPLICATION_JSON_VALUE)
@@ -26,8 +30,14 @@ public class UserController extends AbstractDataObjectController<User> {
 
     @Override
     @GetMapping(produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<User>> read() {
+    public ResponseEntity<List<User>> read() {
         return super.read();
+    }
+
+    @Override
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<User> read(@Valid @PathVariable Long id) {
+        return super.read(id);
     }
 
     @Override
@@ -36,9 +46,34 @@ public class UserController extends AbstractDataObjectController<User> {
         return super.update(user);
     }
 
-    @Override
-    protected DataObjectService<User> getService() {
-        return new UserService();
+    @GetMapping(value = "/{id}/friends")
+    public ResponseEntity<Collection<User>> getFriends(@Valid @PathVariable Long id) {
+        return ResponseEntity.ok(service.getFriends(id));
+    }
+
+    @GetMapping(value = "/{id}/friends/common/{userId}")
+    public ResponseEntity<Collection<User>> getFriends(@Valid @PathVariable Long id, @Valid @PathVariable Long userId) {
+        return ResponseEntity.ok(service.getCommonFriends(id, userId));
+    }
+
+    @PutMapping(value = "/{id}/friends/{userId}")
+    public Map<String, Boolean> addFriend(@Valid @PathVariable Long id, @Valid @PathVariable Long userId) {
+        return Map.of("completed", service.addFriend(id, userId));
+    }
+
+    @DeleteMapping(value = "/{id}/friends/{userId}")
+    public Map<String, Boolean> deleteFriend(@Valid @PathVariable Long id, @Valid @PathVariable Long userId) {
+        return Map.of("completed", service.deleteFriend(id, userId));
+    }
+
+    @GetMapping(value = "/popular?count={count}")
+    public ResponseEntity<Collection<User>> getMostPopularUsers(@Valid @RequestParam Integer count) {
+        return ResponseEntity.ok(service.getMostPopularUsers(count));
+    }
+
+    @GetMapping(value = "/popular")
+    public ResponseEntity<Collection<User>> getMostPopularUsers() {
+        return ResponseEntity.ok(service.getMostPopularUsers());
     }
 
 }
