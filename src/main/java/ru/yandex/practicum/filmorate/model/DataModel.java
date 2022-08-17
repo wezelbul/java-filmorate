@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-public interface DataObject {
+public interface DataModel {
     Long getId();
     void setId(Long id);
 }

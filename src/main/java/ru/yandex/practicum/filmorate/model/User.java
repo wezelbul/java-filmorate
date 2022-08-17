@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 @Data
 @Slf4j
-public class User implements DataObject {
+public class User implements DataModel {
 
     Long id;
 
@@ -57,7 +57,6 @@ public class User implements DataObject {
         } else {
             return name;
         }
-
     }
 
 }
