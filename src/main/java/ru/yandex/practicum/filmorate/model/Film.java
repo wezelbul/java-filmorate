@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @Data
 @Slf4j
-public class Film implements DataObject {
+public class Film implements DataModel {
 
     Long id;
 

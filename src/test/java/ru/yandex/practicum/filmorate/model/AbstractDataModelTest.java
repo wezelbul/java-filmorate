@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class AbstractDataObjectTest<T extends DataObject> implements DataObjectTest {
+public abstract class AbstractDataModelTest<T extends DataModel> implements DataModelTest {
     
     protected String jsonDir = "src/test/resources/validation/json";
 
