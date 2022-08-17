@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class ErrorHandlingControllerAdvice {
 
     @ExceptionHandler(DataObjectNotFoundException.class)
-    public ResponseEntity<Response> validationException(DataObjectNotFoundException exception) {
+    public ResponseEntity<Response> notFoundException(DataObjectNotFoundException exception) {
         Response response = new Response(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
