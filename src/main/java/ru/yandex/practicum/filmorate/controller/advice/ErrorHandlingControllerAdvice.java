@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.yandex.practicum.filmorate.exception.base.DataObjectAlreadyExist;
+import ru.yandex.practicum.filmorate.exception.base.DataObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.base.DevelopmentException;
 
@@ -25,8 +25,8 @@ public class ErrorHandlingControllerAdvice {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(DataObjectAlreadyExist.class)
-    public ResponseEntity<Response> alreadyExistException(DataObjectAlreadyExist exception) {
+    @ExceptionHandler(DataObjectAlreadyExistException.class)
+    public ResponseEntity<Response> alreadyExistException(DataObjectAlreadyExistException exception) {
         Response response = new Response(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
