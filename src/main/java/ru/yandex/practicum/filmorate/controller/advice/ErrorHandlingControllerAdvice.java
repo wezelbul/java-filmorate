@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller.advice;
 
+import org.h2.jdbc.JdbcSQLSyntaxErrorException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -7,7 +8,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.yandex.practicum.filmorate.exception.DataObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.base.DataObjectAlreadyExist;
+import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.base.DevelopmentException;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
@@ -20,6 +23,18 @@ public class ErrorHandlingControllerAdvice {
     public ResponseEntity<Response> notFoundException(DataObjectNotFoundException exception) {
         Response response = new Response(exception.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DataObjectAlreadyExist.class)
+    public ResponseEntity<Response> alreadyExistException(DataObjectAlreadyExist exception) {
+        Response response = new Response(exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({JdbcSQLSyntaxErrorException.class, DevelopmentException.class})
+    public ResponseEntity<Response> sqlSyntaxErrorException() {
+        Response response = new Response("Sorry about it, we are work to be better");
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ResponseBody
