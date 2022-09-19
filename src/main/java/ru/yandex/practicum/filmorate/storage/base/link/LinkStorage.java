@@ -1,15 +1,15 @@
 package ru.yandex.practicum.filmorate.storage.base.link;
 
-import java.util.Set;
+import java.util.List;
 
 public interface LinkStorage {
 
-    Set<Long> getValue(Long id);
+    List<Long> getValue(Long id);
 
     boolean addLink(Long id, Long linkedId);
 
     boolean deleteLink(Long id, Long linkedId);
 
-    Set<Long> getMostPopularObjectId(Integer count);
+    List<Long> getMostPopularObjectId(Integer count);
 
 }

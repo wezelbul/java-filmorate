@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.base.link;
 
-import ru.yandex.practicum.filmorate.exception.DataObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.DataModel;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
 
@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public abstract class InMemoryLinkStorage<Model extends DataModel, LinkedModel extends DataModel> implements LinkStorage {
 
 
-    protected Map<Long, Set<Long>> idStorage = new HashMap<>();
+    protected Map<Long, List<Long>> idStorage = new HashMap<>();
 
     protected final DataStorage<Model> modelStorage;
 
@@ -23,10 +23,10 @@ public abstract class InMemoryLinkStorage<Model extends DataModel, LinkedModel e
     }
 
     @Override
-    public Set<Long> getValue(@Positive Long dataObjectId) {
-        Set<Long> result = idStorage.get(dataObjectId);
+    public List<Long> getValue(@Positive Long dataObjectId) {
+        List<Long> result = idStorage.get(dataObjectId);
         if (result == null) {
-            result = new TreeSet<>();
+            result = new ArrayList<>();
         }
         return result;
     }
@@ -34,7 +34,7 @@ public abstract class InMemoryLinkStorage<Model extends DataModel, LinkedModel e
     @Override
     public boolean addLink(@Positive Long id, @Positive Long linkedId) {
         if (contains(id, linkedId)) {
-            Set<Long> newSet = getValue(id);
+            List<Long> newSet = getValue(id);
             newSet.add(linkedId);
             idStorage.put(id, newSet);
             return true;
@@ -45,12 +45,12 @@ public abstract class InMemoryLinkStorage<Model extends DataModel, LinkedModel e
     @Override
     public boolean deleteLink(@Positive Long id, @Positive Long linkedId) {
         if (contains(id, linkedId)) {
-            Set<Long> newSet = getValue(id);
-            newSet.remove(linkedId);
-            if (newSet.isEmpty()) {
+            List<Long> newList = getValue(id);
+            newList.remove(linkedId);
+            if (newList.isEmpty()) {
                 idStorage.remove(id);
             } else {
-                idStorage.put(id, newSet);
+                idStorage.put(id, newList);
             }
             return true;
         }
@@ -58,15 +58,14 @@ public abstract class InMemoryLinkStorage<Model extends DataModel, LinkedModel e
     }
 
     @Override
-    public Set<Long> getMostPopularObjectId(@Positive Integer count) {
-        return new LinkedHashSet<>(idStorage.keySet().stream().sorted(new Comparator<Long>() {
+    public List<Long> getMostPopularObjectId(@Positive Integer count) {
+        return idStorage.keySet().stream().sorted(new Comparator<Long>() {
             @Override
             public int compare(Long o1, Long o2) {
                 return Integer.compare(idStorage.get(o2).size(), idStorage.get(o1).size());
             }
         })
-                .limit(count)
-                .collect(Collectors.toSet()));
+                .limit(count).distinct().collect(Collectors.toList());
     }
 
     private boolean contains(@Positive Long id, @Positive Long linkedId) {
