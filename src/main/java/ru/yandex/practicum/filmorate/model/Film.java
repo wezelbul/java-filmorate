@@ -1,13 +1,18 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.validation.annotation.AfterCinemaBirthday;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
+@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
 public class Film implements DataModel {
 
@@ -29,5 +34,12 @@ public class Film implements DataModel {
     @NotNull(message = "Duration can not be null")
     @Positive(message = "Duration is negative or zero")
     Integer duration;
+
+    @NotNull(message = "MPA rating can not be null")
+    MpaRating mpa;
+
+    Long rate;
+
+    List<Genre> genres;
 
 }
