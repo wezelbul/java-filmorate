@@ -1,0 +1,81 @@
+package ru.yandex.practicum.filmorate.storage.film;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.util.UtilReader;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.List;
+
+@Repository
+public class DbFilmStorage implements DataStorage<Film> {
+
+    private final JdbcTemplate films;
+    private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/film/";
+    private static final String SELECT_ALL_SQL_PATH = SQL_QUERY_DIR + "select_all.sql";
+    private static final String SELECT_BY_ID_SQL_PATH = SQL_QUERY_DIR + "select_by_id.sql";
+    private static final String INSERT_SQL_PATH = SQL_QUERY_DIR + "insert.sql";
+    private static final String UPDATE_SQL_PATH = SQL_QUERY_DIR + "update.sql";
+
+    public DbFilmStorage(JdbcTemplate films) {
+        this.films = films;
+    }
+
+    @Override
+    public List<Film> getAll() {
+        return films.query(
+                UtilReader.readString(SELECT_ALL_SQL_PATH),
+                new FilmMapper());
+    }
+
+    @Override
+    public Film getById(Long id) {
+        return films.query(
+                UtilReader.readString(SELECT_BY_ID_SQL_PATH),
+                new FilmMapper(), id).stream().findAny().orElse(null);
+    }
+
+    @Override
+    public boolean contains(Long id) {
+        return getById(id) != null;
+    }
+
+    @Override
+    public Film add(Film object) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        films.update(connection -> {
+
+            PreparedStatement preparedStatement = connection
+                    .prepareStatement(UtilReader.readString(INSERT_SQL_PATH),
+                            Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, object.getName());
+            preparedStatement.setString(2, object.getDescription());
+            preparedStatement.setDate(3, Date.valueOf(object.getReleaseDate()));
+            preparedStatement.setInt(4, object.getDuration());
+            preparedStatement.setInt(5, object.getMpa().getId());
+            return preparedStatement;
+
+        }, keyHolder);
+
+        return getById(keyHolder.getKey().longValue());
+    }
+
+    @Override
+    public Film update(Film object) {
+        films.update(UtilReader.readString(UPDATE_SQL_PATH),
+                object.getName(),
+                object.getDescription(),
+                Date.valueOf(object.getReleaseDate()),
+                object.getDuration(),
+                object.getMpa().getId(),
+                object.getId());
+        return getById(object.getId());
+    }
+
+}
