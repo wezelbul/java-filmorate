@@ -72,7 +72,7 @@
 ## Схема БД и примеры запросов
 
 <a href="https://drawsql.app/teams/wezelteam/diagrams/java-filmorate" title="go to diagram on drawsql.app">
-    <img src="https://github.com/wezelbul/java-filmorate/blob/add-database/src/main/resources/schema.png" />
+    <img src="https://github.com/wezelbul/java-filmorate/blob/main/src/main/resources/schema.png" />
 </a>
 
 <details>
