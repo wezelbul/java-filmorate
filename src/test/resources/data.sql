@@ -37,12 +37,12 @@ VALUES (1, 1),
        (3, 2),
        (3, 3);
 
-INSERT IGNORE INTO user_friends (user_id, friend_id, confirming_status)
-VALUES (1, 2, TRUE),
-       (2, 1, TRUE),
-       (2, 3, TRUE),
-       (3, 1, DEFAULT),
-       (3, 2, TRUE);
+INSERT IGNORE INTO user_friends (user_id, friend_id)
+VALUES (1, 2),
+       (2, 1),
+       (2, 3),
+       (3, 1),
+       (3, 2);
 
 INSERT IGNORE INTO film_genres (film_id, genre_id)
 VALUES (1, 1),
