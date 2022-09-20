@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import ru.yandex.practicum.filmorate.model.DataModel;
-import ru.yandex.practicum.filmorate.service.DataService;
+import ru.yandex.practicum.filmorate.service.base.data.DataService;
 
 import java.util.*;
 

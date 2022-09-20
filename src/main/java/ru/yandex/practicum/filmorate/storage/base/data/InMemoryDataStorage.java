@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.base.data;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.model.DataModel;
-import ru.yandex.practicum.filmorate.exception.DataObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -62,7 +62,7 @@ public abstract class InMemoryDataStorage<Model extends DataModel> implements Da
             if (object.getId() > 0) {
                 return object.getId();
             } else {
-                throw new DataObjectNotFoundException(object);
+                throw new DataObjectNotFoundException(object.getClass(), object.getId());
             }
         }
     }

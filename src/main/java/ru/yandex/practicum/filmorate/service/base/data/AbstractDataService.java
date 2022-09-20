@@ -1,14 +1,14 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.base.data;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.DataModel;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Slf4j
@@ -37,10 +37,13 @@ public abstract class AbstractDataService
 
     @Override
     public Model getById(Long id) {
+        if (!contains(id)) {
+            throw new DataObjectNotFoundException(id);
+        }
         log.debug("Try to get {}-object with id={}", getClassType().getSimpleName(), id);
         Model object = objectStorage.getById(id);
         log.debug("Return {}-object with id={}", object.getClass().getSimpleName(), object.getId());
-        return objectStorage.getById(id);
+        return object;
     }
 
     @Override
@@ -57,11 +60,15 @@ public abstract class AbstractDataService
     @Override
     public Model update(Model object) {
         log.debug(object.toString());
-        return objectStorage.update(object);
+        if (contains(object.getId())) {
+            return objectStorage.update(object);
+        } else {
+            throw new DataObjectNotFoundException(object.getClass(), object.getId());
+        }
     }
 
-    protected Set<Model> convertIdSetToModelCollection(Set<Long> idSet) {
-        Set<Model> result = new HashSet<>();
+    protected List<Model> convertIdListToModelList(List<Long> idSet) {
+        List<Model> result = new ArrayList<>();
         for (Long id : idSet) {
             result.add(objectStorage.getById(id));
         }

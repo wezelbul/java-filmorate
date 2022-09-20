@@ -2,5 +2,6 @@
   "name": null,
   "description": "nisi eiusmod",
   "releaseDate": "1967-03-25",
-  "duration": 150
+  "duration": 150,
+  "mpa": {"id": 1}
 }
