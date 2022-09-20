@@ -8,7 +8,6 @@ import java.util.List;
 public interface FriendStorage extends LinkStorage {
 
     Boolean getConfirmingStatus(Long userId, Long friendId);
-    void setConfirmingStatus(boolean status, Long userId, Long friendId);
     List<User> getFriends(Long userId);
     List<User> getCommonFriends(Long userId, Long friendId);
 

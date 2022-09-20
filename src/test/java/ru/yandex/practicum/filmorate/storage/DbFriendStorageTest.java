@@ -83,12 +83,6 @@ public class DbFriendStorageTest {
     }
 
     @Test
-    void setConfirmingStatus() {
-        friendStorage.setConfirmingStatus(true, 3L, 1L);
-        Assertions.assertTrue(friendStorage.getConfirmingStatus(3L, 1L));
-    }
-
-    @Test
     @Tag("SkipCleanup")
     void getFriendsTest() {
         long[] idArray = friendStorage.getFriends(1L)
