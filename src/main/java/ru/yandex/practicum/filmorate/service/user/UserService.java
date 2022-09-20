@@ -28,15 +28,11 @@ public class UserService extends AbstractDataService<User, DbUserStorage> {
     }
 
     public List<User> getFriends(Long userId) {
-        //return convertIdListToModelList(friendStorage.getValue(userId));
         return friendStorage.getFriends(userId);
     }
 
     public List<User> getCommonFriends(Long userId, Long friendId) {
         return friendStorage.getCommonFriends(userId, friendId);
-        //List<User> result = getFriends(userId);
-        //result.retainAll(getFriends(friendId));
-        //return result;
     }
 
     public boolean addFriend(Long userId, Long friendId) {
@@ -49,11 +45,6 @@ public class UserService extends AbstractDataService<User, DbUserStorage> {
                 throw new DataObjectNotFoundException(userId);
             }
         }
-
-        if (friendStorage.getConfirmingStatus(friendId, userId)) {
-            friendStorage.setConfirmingStatus(true, userId, friendId);
-            friendStorage.setConfirmingStatus(true, friendId, userId);
-        }
         return true;
     }
 
@@ -63,7 +54,6 @@ public class UserService extends AbstractDataService<User, DbUserStorage> {
         } else if (!contains(friendId)) {
             throw new DataObjectNotFoundException(friendId);
         }
-        friendStorage.setConfirmingStatus(false, friendId, userId);
         return friendStorage.deleteLink(userId, friendId);
     }
 

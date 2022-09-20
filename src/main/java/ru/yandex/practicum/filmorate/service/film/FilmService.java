@@ -120,16 +120,6 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
         if (count == null) {
             return getMostPopularFilms(defaultCountPopularFilms);
         }
-
-        //List<Film> likedFilms = new LinkedList<>(convertIdListToModelList(likeStorage.getMostPopularObjectId(count)));
-        //if (likedFilms.size() < count) {
-        //    count -= likedFilms.size();
-        //    List<Film> unlikedFilms = new ArrayList<>(getAll());
-        //    unlikedFilms.removeAll(likedFilms);
-        //    unlikedFilms = unlikedFilms.stream().limit(count).collect(Collectors.toList());
-        //    likedFilms.addAll(unlikedFilms);
-        //}
-        //return likedFilms;
         return likeStorage.getMostPopularFilms(count);
     }
 
