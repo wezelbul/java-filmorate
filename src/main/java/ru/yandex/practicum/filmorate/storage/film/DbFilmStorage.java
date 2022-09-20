@@ -18,10 +18,10 @@ public class DbFilmStorage implements DataStorage<Film> {
 
     private final JdbcTemplate films;
     private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/film/";
-    private static final String SELECT_ALL_SQL_PATH = SQL_QUERY_DIR + "select_all.sql";
-    private static final String SELECT_BY_ID_SQL_PATH = SQL_QUERY_DIR + "select_by_id.sql";
-    private static final String INSERT_SQL_PATH = SQL_QUERY_DIR + "insert.sql";
-    private static final String UPDATE_SQL_PATH = SQL_QUERY_DIR + "update.sql";
+    private static final String SELECT_ALL_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_all.sql");
+    private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
+    private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
+    private static final String UPDATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "update.sql");
 
     public DbFilmStorage(JdbcTemplate films) {
         this.films = films;
@@ -29,16 +29,12 @@ public class DbFilmStorage implements DataStorage<Film> {
 
     @Override
     public List<Film> getAll() {
-        return films.query(
-                UtilReader.readString(SELECT_ALL_SQL_PATH),
-                new FilmMapper());
+        return films.query(SELECT_ALL_SQL_QUERY, new FilmMapper());
     }
 
     @Override
     public Film getById(Long id) {
-        return films.query(
-                UtilReader.readString(SELECT_BY_ID_SQL_PATH),
-                new FilmMapper(), id).stream().findAny().orElse(null);
+        return films.query(SELECT_BY_ID_SQL_QUERY, new FilmMapper(), id).stream().findAny().orElse(null);
     }
 
     @Override
@@ -52,7 +48,7 @@ public class DbFilmStorage implements DataStorage<Film> {
         films.update(connection -> {
 
             PreparedStatement preparedStatement = connection
-                    .prepareStatement(UtilReader.readString(INSERT_SQL_PATH),
+                    .prepareStatement(INSERT_SQL_QUERY,
                             Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, object.getName());
             preparedStatement.setString(2, object.getDescription());
@@ -68,7 +64,7 @@ public class DbFilmStorage implements DataStorage<Film> {
 
     @Override
     public Film update(Film object) {
-        films.update(UtilReader.readString(UPDATE_SQL_PATH),
+        films.update(UPDATE_SQL_QUERY,
                 object.getName(),
                 object.getDescription(),
                 Date.valueOf(object.getReleaseDate()),
