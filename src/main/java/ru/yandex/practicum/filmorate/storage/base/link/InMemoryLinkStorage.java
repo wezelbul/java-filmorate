@@ -65,7 +65,7 @@ public abstract class InMemoryLinkStorage<Model extends DataModel, LinkedModel e
                 return Integer.compare(idStorage.get(o2).size(), idStorage.get(o1).size());
             }
         })
-                .limit(count).distinct().collect(Collectors.toList());
+                .distinct().limit(count).collect(Collectors.toList());
     }
 
     private boolean contains(@Positive Long id, @Positive Long linkedId) {
