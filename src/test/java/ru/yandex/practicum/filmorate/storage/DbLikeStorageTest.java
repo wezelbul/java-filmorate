@@ -73,7 +73,7 @@ public class DbLikeStorageTest {
     @Test
     @Tag("SkipCleanup")
     void getMostPopularFilmsTest() {
-        long[] idArray = likeStorage.getMostPopularFilms(2, 0, 0)
+        long[] idArray = likeStorage.getMostPopularFilms(2)
                 .stream().mapToLong(Film::getId).toArray();
         Assertions.assertArrayEquals(new long[]{3L, 2L}, idArray);
     }
@@ -81,7 +81,7 @@ public class DbLikeStorageTest {
     @Test
     @Tag("SkipCleanup")
     void getMostPopularFilmsYearTest() {
-        long[] idArray = likeStorage.getMostPopularFilms(10, 0, 1969)
+        long[] idArray = likeStorage.getMostPopularFilmsYear(10, 1969)
                 .stream().mapToLong(Film::getId).toArray();
         Assertions.assertEquals(idArray.length, 1);
         Assertions.assertArrayEquals(new long[]{1L}, idArray);
@@ -90,7 +90,7 @@ public class DbLikeStorageTest {
     @Test
     @Tag("SkipCleanup")
     void getMostPopularFilmsGenreIdTest() {
-        long[] idArray = likeStorage.getMostPopularFilms(10, 1, 0)
+        long[] idArray = likeStorage.getMostPopularFilmsGenre(10, 1)
                 .stream().mapToLong(Film::getId).toArray();
         Assertions.assertArrayEquals(new long[]{3L, 1L}, idArray);
     }
@@ -98,7 +98,7 @@ public class DbLikeStorageTest {
     @Test
     @Tag("SkipCleanup")
     void getMostPopularFilmsGenreIdYearTest() {
-        long[] idArray = likeStorage.getMostPopularFilms(10, 1, 1969)
+        long[] idArray = likeStorage.getMostPopularFilmsGenreYear(10, 1, 1969)
                 .stream().mapToLong(Film::getId).toArray();
         Assertions.assertArrayEquals(new long[]{1L}, idArray);
     }

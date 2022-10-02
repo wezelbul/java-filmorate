@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.storage.genre.DbGenreStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.DbLikeStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
 
 import java.util.*;
@@ -117,7 +118,23 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
     }
 
     public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
-        return likeStorage.getMostPopularFilms(count, genreId, year);
-    }
+        if (count == null) {
+            count = defaultCountPopularFilms;
+        }
 
+        if (genreId == null && year == null) {
+            return likeStorage.getMostPopularFilms(count);
+        } else {
+
+            if (year == null) {
+                return likeStorage.getMostPopularFilmsGenre(count, genreId);
+            }
+
+            if (genreId == null) {
+                return likeStorage.getMostPopularFilmsYear(count, year);
+            }
+
+            return likeStorage.getMostPopularFilmsGenreYear(count, genreId, year);
+        }
+    }
 }
