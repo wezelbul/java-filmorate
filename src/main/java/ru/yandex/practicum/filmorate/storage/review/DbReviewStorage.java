@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.GetMapping;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.sql.PreparedStatement;
@@ -41,7 +42,47 @@ public class DbReviewStorage implements ReviewStorage {
             return stmt;
         }, keyHolder);
 
-        return getReviewById(review.getReviewId());
+        return getReviewById((Long) keyHolder.getKey());
+    }
+
+    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано то 10.
+    @Override
+    public List<Review> getAllReviewByFilmId(Long filmId, Integer count) {
+        // Если есть идентификатор фильма указано
+        if (filmId != null) {
+            final String sqlQuery = "" +
+                    "SELECT review_id, content, is_positive, user_id, film_id, useful " +
+                    "FROM reviews " +
+                    "WHERE film_id = ?" +
+                    "ORDER BY useful LIMIT ?";
+
+            List<Review> review = jdbcTemplate.query(sqlQuery, DbReviewStorage::makeReview, filmId, count);
+
+            return review;
+        // Если идентификатор фильма НЕ указан
+        } else {
+            final String sqlQuery = "" +
+                    "SELECT review_id, content, is_positive, user_id, film_id, useful " +
+                    "FROM reviews " +
+                    "ORDER BY useful LIMIT ?";
+
+            List<Review> review = jdbcTemplate.query(sqlQuery, DbReviewStorage::makeReview, count);
+
+            return review;
+        }
+    }
+
+    // Получение отзыва по идентификатору
+    @Override
+    public Review getReviewById(Long reviewId) {
+        final String sqlQueryFilm = "" +
+                "SELECT review_id, content, is_positive, user_id, film_id, useful " +
+                "FROM reviews " +
+                "WHERE review_id = ?";
+
+        List<Review> review = jdbcTemplate.query(sqlQueryFilm, DbReviewStorage::makeReview, reviewId);
+
+        return review.get(0);
     }
 
     // Редактирование уже имеющегося отзыва
@@ -57,7 +98,8 @@ public class DbReviewStorage implements ReviewStorage {
                 review.getIsPositive(),
                 review.getUserId(),
                 review.getFilmId(),
-                review.getUseful());
+                review.getUseful(),
+                review.getReviewId());
 
         return getReviewById(review.getReviewId());
     }
@@ -68,19 +110,6 @@ public class DbReviewStorage implements ReviewStorage {
         final String sqlQuery = "DELETE FROM reviews WHERE review_id = ?";
 
         jdbcTemplate.update(sqlQuery, reviewId);
-    }
-
-    // Получение отзыва по идентификатору
-    @Override
-    public Review getReviewById(Long reviewId) {
-        final String sqlQueryFilm = "" +
-                "SELECT review_id, content, is_positive, user_id, film_id, useful " +
-                "FROM reviews " +
-                "WHERE review_id = ?";
-
-        List<Review> review = jdbcTemplate.query(sqlQueryFilm, DbReviewStorage::makeReview, reviewId);
-
-        return review.get(0);
     }
 
     // Проверка на существование отзыва

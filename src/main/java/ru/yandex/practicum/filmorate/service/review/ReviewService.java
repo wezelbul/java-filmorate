@@ -3,11 +3,14 @@ package ru.yandex.practicum.filmorate.service.review;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.DbReviewStorage;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
+
+import java.util.List;
 
 /**
  * Сервисы для отзывов
@@ -29,41 +32,54 @@ public class ReviewService {
         return dbReviewStorage.createReview(review);
     }
 
+    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано то 10.
+    @GetMapping
+    public List<Review> getAllReviewByFilmId(Long filmId, Integer count) {
+        if (filmId != null) {
+            checkingForExistenceFilm(filmId);
+        }
+        log.info("Получение списка из {} отзывов для фильма с ИД: {}", count, filmId);
+        return dbReviewStorage.getAllReviewByFilmId(filmId, count);
+    }
+
+    // Получение отзыва по идентификатору
+    public Review getReviewById(Long reviewId) {
+        checkingForExistenceReview(reviewId);
+        log.info("Получение отзыва по ИД: {}", reviewId);
+        return dbReviewStorage.getReviewById(reviewId);
+    }
+
     // Редактирование уже имеющегося отзыва
     public Review updateReview(Review review) {
         checkingForExistenceReview(review.getReviewId());
+        log.info("Редактирование уже имеющегося отзыва: {}", review);
         return dbReviewStorage.updateReview(review);
     }
 
     // Удаление уже имеющегося отзыва по идентификатору
     public void deleteReviewById(Long reviewId) {
         checkingForExistenceReview(reviewId);
+        log.info("Удаление уже имеющегося отзыва c ИД: {}", reviewId);
         dbReviewStorage.deleteReviewById(reviewId);
-    }
-
-    // Получение отзыва по идентификатору
-    public Review getReviewById(Long reviewId) {
-        checkingForExistenceReview(reviewId);
-        return dbReviewStorage.getReviewById(reviewId);
     }
 
     // проверка на существование отзыва по идентификатору
     private void checkingForExistenceReview(Long reviewId) {
-        if (dbReviewStorage.contains(reviewId)) {
+        if (!dbReviewStorage.contains(reviewId)) {
             throw new DataObjectNotFoundException(reviewId);
         }
     }
 
     // проверка на существование фильма по идентификатору
     private void checkingForExistenceFilm(Long filmId) {
-        if (dbFilmStorage.contains(filmId)) {
+        if (!dbFilmStorage.contains(filmId)) {
             throw new DataObjectNotFoundException(filmId);
         }
     }
 
     // проверка на существование пользователя по идентификатору
     private void checkingForExistenceUser(Long userId) {
-        if (dbUserStorage.contains(userId)) {
+        if (!dbUserStorage.contains(userId)) {
             throw new DataObjectNotFoundException(userId);
         }
     }
