@@ -22,6 +22,8 @@ WHERE FL.FILM_ID IN (SELECT F.FILM_ID
             GROUP BY F.FILM_ID
             ORDER BY COUNT(FI_LI.USER_ID) DESC, F.FILM_ID
             LIMIT ?
-    ) AND  FG.GENRE_ID = ?
+    ) AND  FL.FILM_ID = (SELECT M_G.FILM_ID  // Вывод фильмов с соответствующему жанру
+                         FROM FILM_GENRES AS M_G
+                         WHERE  M_G.FILM_ID = FL.FILM_ID AND M_G.GENRE_ID = ?)
 GROUP BY GENRE_NAME, FG.FILM_ID
 ORDER BY rate DESC, FG.FILM_ID, GENRE_NAME                 // количество выгружаемых записей
