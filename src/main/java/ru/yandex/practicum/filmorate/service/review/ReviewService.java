@@ -32,7 +32,7 @@ public class ReviewService {
         return dbReviewStorage.createReview(review);
     }
 
-    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано то 10.
+    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано, то 10.
     @GetMapping
     public List<Review> getAllReviewByFilmId(Long filmId, Integer count) {
         if (filmId != null) {
@@ -61,6 +61,38 @@ public class ReviewService {
         checkingForExistenceReview(reviewId);
         log.info("Удаление уже имеющегося отзыва c ИД: {}", reviewId);
         dbReviewStorage.deleteReviewById(reviewId);
+    }
+
+    // Пользователь ставит лайк отзыву
+    public void likeReview(Long reviewId, Long userId) {
+        checkingForExistenceReview(reviewId);
+        checkingForExistenceUser(userId);
+        log.info("Пользователь: {} ставит лайк отзыву: {}", userId, reviewId);
+        dbReviewStorage.likeReview(reviewId, userId);
+    }
+
+    // Пользователь ставит дизлайк отзыву
+    public void dislikeReview(Long reviewId, Long userId) {
+        checkingForExistenceReview(reviewId);
+        checkingForExistenceUser(userId);
+        log.info("Пользователь: {} ставит дизлайк отзыву: {}", userId, reviewId);
+        dbReviewStorage.dislikeReview(reviewId, userId);
+    }
+
+    // Пользователь удаляет лайк отзыву
+    public void deleteLikeReview(Long reviewId, Long userId) {
+        checkingForExistenceReview(reviewId);
+        checkingForExistenceUser(userId);
+        log.info("Пользователь: {} удаляет лайк отзыву: {}", userId, reviewId);
+        dbReviewStorage.deleteLikeReview(reviewId, userId);
+    }
+
+    // Пользователь удаляет дизлайк отзыву
+    public void deleteDislikeReview(Long reviewId, Long userId) {
+        checkingForExistenceReview(reviewId);
+        checkingForExistenceUser(userId);
+        log.info("Пользователь: {} удаляет дизлайк отзыву: {}", userId, reviewId);
+        dbReviewStorage.deleteDislikeReview(reviewId, userId);
     }
 
     // проверка на существование отзыва по идентификатору

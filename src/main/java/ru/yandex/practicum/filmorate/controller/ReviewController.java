@@ -8,7 +8,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * Контроллер отзыовов к фильмам
+ * Контроллер отзывов к фильмам
  */
 @RestController
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class ReviewController {
         return reviewService.createReview(review);
     }
 
-    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано то 10.
+    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано, то 10.
     @GetMapping
     public List<Review> getAllReviewByFilmId(
             @RequestParam(required = false) Long filmId,
@@ -46,5 +46,29 @@ public class ReviewController {
     @DeleteMapping("/{reviewId}")
     public void deleteReviewById(@PathVariable("reviewId") Long reviewId) {
         reviewService.deleteReviewById(reviewId);
+    }
+
+    // Пользователь ставит лайк отзыву
+    @PutMapping("{reviewId}/like/{userId}")
+    public void likeReview(@PathVariable Long reviewId, @PathVariable Long userId) {
+        reviewService.likeReview(reviewId, userId);
+    }
+
+    // Пользователь ставит дизлайк отзыву
+    @PutMapping("{reviewId}/dislike/{userId}")
+    public void dislikeReview(@PathVariable Long reviewId, @PathVariable Long userId) {
+        reviewService.dislikeReview(reviewId, userId);
+    }
+
+    // Пользователь удаляет лайк отзыву
+    @DeleteMapping("{reviewId}/like/{userId}")
+    public void deleteLikeReview(@PathVariable Long reviewId, @PathVariable Long userId) {
+        reviewService.deleteLikeReview(reviewId, userId);
+    }
+
+    // Пользователь удаляет дизлайк отзыву
+    @DeleteMapping("{reviewId}/dislike/{userId}")
+    public void deleteDislikeReview(@PathVariable Long reviewId, @PathVariable Long userId) {
+        reviewService.deleteDislikeReview(reviewId, userId);
     }
 }

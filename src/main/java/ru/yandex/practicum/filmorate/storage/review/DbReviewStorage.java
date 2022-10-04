@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.GetMapping;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.sql.PreparedStatement;
@@ -45,7 +44,7 @@ public class DbReviewStorage implements ReviewStorage {
         return getReviewById((Long) keyHolder.getKey());
     }
 
-    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано то 10.
+    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано, то 10.
     @Override
     public List<Review> getAllReviewByFilmId(Long filmId, Integer count) {
         // Если есть идентификатор фильма указано
@@ -54,21 +53,17 @@ public class DbReviewStorage implements ReviewStorage {
                     "SELECT review_id, content, is_positive, user_id, film_id, useful " +
                     "FROM reviews " +
                     "WHERE film_id = ?" +
-                    "ORDER BY useful LIMIT ?";
+                    "ORDER BY useful DESC LIMIT ?";
 
-            List<Review> review = jdbcTemplate.query(sqlQuery, DbReviewStorage::makeReview, filmId, count);
-
-            return review;
-        // Если идентификатор фильма НЕ указан
+            return jdbcTemplate.query(sqlQuery, DbReviewStorage::makeReview, filmId, count);
+            // Если идентификатор фильма НЕ указан
         } else {
             final String sqlQuery = "" +
                     "SELECT review_id, content, is_positive, user_id, film_id, useful " +
                     "FROM reviews " +
-                    "ORDER BY useful LIMIT ?";
+                    "ORDER BY useful DESC LIMIT ?";
 
-            List<Review> review = jdbcTemplate.query(sqlQuery, DbReviewStorage::makeReview, count);
-
-            return review;
+            return jdbcTemplate.query(sqlQuery, DbReviewStorage::makeReview, count);
         }
     }
 
@@ -82,7 +77,7 @@ public class DbReviewStorage implements ReviewStorage {
 
         List<Review> review = jdbcTemplate.query(sqlQueryFilm, DbReviewStorage::makeReview, reviewId);
 
-        return review.get(0);
+        return review.stream().findAny().orElse(null);
     }
 
     // Редактирование уже имеющегося отзыва
@@ -110,6 +105,54 @@ public class DbReviewStorage implements ReviewStorage {
         final String sqlQuery = "DELETE FROM reviews WHERE review_id = ?";
 
         jdbcTemplate.update(sqlQuery, reviewId);
+    }
+
+    // Пользователь ставит лайк отзыву
+    @Override
+    public void likeReview(Long reviewId, Long userId) {
+        final String sqlQueryInsertLike = "INSERT INTO reviews_likes (review_id, user_id, is_like) values (?,?,?)";
+
+        jdbcTemplate.update(sqlQueryInsertLike, reviewId, userId, true);
+
+        final String sqlQueryIncreaseUseful = "UPDATE reviews set useful = useful + 1 where review_id = ?";
+
+        jdbcTemplate.update(sqlQueryIncreaseUseful, reviewId);
+    }
+
+    // Пользователь ставит дизлайк отзыву
+    @Override
+    public void dislikeReview(Long reviewId, Long userId) {
+        final String sqlQueryInsertDislike = "INSERT INTO reviews_likes (review_id, user_id, is_like) values (?,?,?)";
+
+        jdbcTemplate.update(sqlQueryInsertDislike, reviewId, userId, false);
+
+        final String sqlQueryDecreaseUseful = "UPDATE reviews set useful = useful - 1 where review_id = ?";
+
+        jdbcTemplate.update(sqlQueryDecreaseUseful, reviewId);
+    }
+
+    // Пользователь удаляет лайк отзыву
+    @Override
+    public void deleteLikeReview(Long reviewId, Long userId) {
+        final String sqlQueryDeleteLike = "DELETE FROM reviews_likes WHERE review_id = ? and user_id = ?";
+
+        jdbcTemplate.update(sqlQueryDeleteLike, reviewId, userId);
+
+        final String sqlQueryDecreaseUseful = "UPDATE reviews set useful = useful - 1 where review_id = ?";
+
+        jdbcTemplate.update(sqlQueryDecreaseUseful, reviewId);
+    }
+
+    // Пользователь удаляет дизлайк отзыву
+    @Override
+    public void deleteDislikeReview(Long reviewId, Long userId) {
+        final String sqlQueryDeleteDislike = "DELETE FROM reviews_likes WHERE review_id = ? and user_id = ?";
+
+        jdbcTemplate.update(sqlQueryDeleteDislike, reviewId, userId);
+
+        final String sqlQueryIncreaseUseful = "UPDATE reviews set useful = useful + 1 where review_id = ?";
+
+        jdbcTemplate.update(sqlQueryIncreaseUseful, reviewId);
     }
 
     // Проверка на существование отзыва

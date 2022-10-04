@@ -8,7 +8,7 @@ import javax.validation.constraints.*;
 @AllArgsConstructor
 public class Review {
     @PositiveOrZero(message = "ИД отзыва не может быть меньше 0")
-    private long reviewId;
+    private Long reviewId;
 
     @NotNull(message = "Отзыв не может быть null")
     @NotBlank(message = "Отзыв не может быть пустой")

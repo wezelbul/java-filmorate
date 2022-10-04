@@ -12,7 +12,7 @@ public interface ReviewStorage {
     // Добавление нового отзыва
     Review createReview(Review review);
 
-    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано то 10.
+    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано, то 10.
     List<Review> getAllReviewByFilmId(Long filmId, Integer count);
 
     // Получение отзыва по идентификатору
@@ -23,6 +23,18 @@ public interface ReviewStorage {
 
     // Удаление уже имеющегося отзыва по идентификатору
     void deleteReviewById(Long reviewId);
+
+    // Пользователь ставит лайк отзыву
+    void likeReview(Long reviewId, Long userId);
+
+    // Пользователь ставит дизлайк отзыву
+    void dislikeReview(Long reviewId, Long userId);
+
+    // Пользователь удаляет лайк отзыву
+    void deleteLikeReview(Long reviewId, Long userId);
+
+    // Пользователь удаляет дизлайк отзыву
+    void deleteDislikeReview(Long reviewId, Long userId);
 
     // Проверка на существование отзыва
     boolean contains(Long reviewId);
