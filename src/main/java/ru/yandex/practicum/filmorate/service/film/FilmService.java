@@ -123,4 +123,12 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
         return likeStorage.getMostPopularFilms(count);
     }
 
+    public boolean deleteFilm(Long filmId) {
+         if (!contains(filmId)) {
+            throw new DataObjectNotFoundException(filmId);
+        }
+        genreStorage.clearFilmGenres(filmId);
+        likeStorage.deleteAllLikesOfFilm(filmId);
+        return super.delete(filmId);
+    }
 }

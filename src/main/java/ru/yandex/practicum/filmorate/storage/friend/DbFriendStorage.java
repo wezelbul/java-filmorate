@@ -29,6 +29,10 @@ public class DbFriendStorage implements FriendStorage {
     private static final String DELETE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete.sql");
     private static final String UPDATE_CONFIRMING_STATUS_SQL_QUERY = UtilReader.readString(
             SQL_QUERY_DIR + "update_confirming_status.sql");
+    private static final String DELETE_ALL_FRIENDS_OF_USER_SQL_QUERY = UtilReader.readString(
+            SQL_QUERY_DIR + "delete_all_friends_of_user.sql");
+    private static final String DELETE_USER_FROM_ALL_FRIENDS_QUERY = UtilReader.readString(
+            SQL_QUERY_DIR + "delete_user_from_all_friends.sql");
 
     public DbFriendStorage(JdbcTemplate userFriends) {
         this.userFriends = userFriends;
@@ -73,5 +77,10 @@ public class DbFriendStorage implements FriendStorage {
         return userFriends.query(SELECT_COMMON_SQL_QUERY, new UserMapper(), userId, friendId);
     }
 
-
+    @Override
+    public Boolean deleteAllFriendsOfUser(Long userId) {
+        userFriends.update(DELETE_ALL_FRIENDS_OF_USER_SQL_QUERY, userId);
+        userFriends.update(DELETE_USER_FROM_ALL_FRIENDS_QUERY, userId);
+        return true;
+    }
 }

@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface LikeStorage extends LinkStorage {
     List<Film> getMostPopularFilms(Integer count);
+
+    public boolean deleteAllLikesOfFilm(Long idFilm);
+
+    public boolean deleteAllLikesOfUser(Long idUser);
 }

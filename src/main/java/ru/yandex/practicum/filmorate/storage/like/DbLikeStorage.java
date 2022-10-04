@@ -19,6 +19,10 @@ public class DbLikeStorage implements LikeStorage {
     private static final String SELECT_ID_COUNT_LIMIT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_id_count_limit.sql");
     private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
     private static final String DELETE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete.sql");
+    private static final String DELETE_ALL_LIKES_OF_FILM_SQL_QUERY = UtilReader.readString(
+            SQL_QUERY_DIR + "delete_all_likes_of_film.sql");
+    private static final String DELETE_ALL_LIKES_OF_USER_SQL_QUERY = UtilReader.readString(
+            SQL_QUERY_DIR + "delete_all_likes_of_user.sql");
 
     public DbLikeStorage(JdbcTemplate filmLikes) {
         this.filmLikes = filmLikes;
@@ -51,4 +55,15 @@ public class DbLikeStorage implements LikeStorage {
         return filmLikes.query(SELECT_COUNT_LIMIT_SQL_QUERY, new FilmMapper(), count);
     }
 
+    @Override
+    public boolean deleteAllLikesOfFilm(Long filmId) {
+        filmLikes.update(DELETE_ALL_LIKES_OF_FILM_SQL_QUERY, filmId);
+        return true;
+    }
+
+    @Override
+    public boolean deleteAllLikesOfUser(Long idUser) {
+        filmLikes.update(DELETE_ALL_LIKES_OF_USER_SQL_QUERY, idUser);
+        return false;
+    }
 }

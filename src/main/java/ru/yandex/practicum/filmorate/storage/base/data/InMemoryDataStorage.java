@@ -66,4 +66,7 @@ public abstract class InMemoryDataStorage<Model extends DataModel> implements Da
             }
         }
     }
+    public boolean delete(Long filmId) {
+        return false;
+    }
 }

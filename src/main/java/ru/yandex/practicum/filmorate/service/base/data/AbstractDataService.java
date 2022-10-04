@@ -75,4 +75,9 @@ public abstract class AbstractDataService
         return result;
     }
 
+    @Override
+    public boolean delete(Long id) {
+        return objectStorage.delete(id);
+    }
+
 }

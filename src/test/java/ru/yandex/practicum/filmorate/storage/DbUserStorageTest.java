@@ -7,6 +7,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
+import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 
@@ -18,6 +21,8 @@ import java.time.LocalDate;
 public class DbUserStorageTest {
 
     private final DbUserStorage userStorage;
+    private final FriendStorage friendStorage;
+    private final LikeStorage likeStorage;
     private final JdbcTemplate jdbcTemplate;
 
     User testUser = new User(
@@ -80,4 +85,11 @@ public class DbUserStorageTest {
         Assertions.assertEquals(testUser, userStorage.update(testUser));
     }
 
+    @Test
+    void deleteTest() {
+        friendStorage.deleteAllFriendsOfUser(1L);
+        likeStorage.deleteAllLikesOfUser(1L);
+        userStorage.delete(1L);
+        Assertions.assertTrue(userStorage.getAll().size()==2);
+    }
 }

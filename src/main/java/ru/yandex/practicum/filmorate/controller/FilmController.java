@@ -58,4 +58,8 @@ public class FilmController extends AbstractDataController<Film, FilmService> {
         return ResponseEntity.ok(service.getMostPopularFilms(count));
     }
 
+    @DeleteMapping(value = "/{id}")
+    public void deleteFilm (@Valid @PathVariable Long id) {
+         service.deleteFilm(id);
+    }
 }
