@@ -5,6 +5,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
+import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.List;
 public class DbLikeStorage implements LikeStorage {
 
     private final JdbcTemplate filmLikes;
+    private final DbFilmStorage dbFilmStorage;
+
     private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/film/like/";
     private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
     private static final String SELECT_COMMON_FILMS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_common_films.sql");
@@ -29,8 +33,9 @@ public class DbLikeStorage implements LikeStorage {
     private static final String DELETE_ALL_LIKES_OF_USER_SQL_QUERY = UtilReader.readString(
             SQL_QUERY_DIR + "delete_all_likes_of_user.sql");
 
-    public DbLikeStorage(JdbcTemplate filmLikes) {
+    public DbLikeStorage(JdbcTemplate filmLikes,DbFilmStorage dbFilmStorage) {
         this.filmLikes = filmLikes;
+        this.dbFilmStorage = dbFilmStorage;
     }
 
     @Override
