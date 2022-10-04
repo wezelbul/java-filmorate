@@ -95,9 +95,13 @@ public class DbFilmStorageTest {
 
     @Test
     void deleteTest() {
+        System.out.println(filmStorage.getAll());
+
         genreStorage.clearFilmGenres(1L);
         likeStorage.deleteAllLikesOfFilm(1L);
         filmStorage.delete(1L);
+        System.out.println(filmStorage.getAll());
         Assertions.assertTrue(filmStorage.getAll().size()==2);
+
     }
 }
