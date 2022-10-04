@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 
 import java.time.LocalDate;
@@ -20,6 +22,8 @@ import java.util.ArrayList;
 public class DbFilmStorageTest {
 
     private final DbFilmStorage filmStorage;
+    private final GenreStorage genreStorage;
+    private final LikeStorage likeStorage ;
     private final JdbcTemplate jdbcTemplate;
 
     Film testFilm = new Film(null,
@@ -89,4 +93,11 @@ public class DbFilmStorageTest {
         Assertions.assertEquals(testFilm, filmStorage.update(testFilm));
     }
 
+    @Test
+    void deleteTest() {
+        genreStorage.clearFilmGenres(1L);
+        likeStorage.deleteAllLikesOfFilm(1L);
+        filmStorage.delete(1L);
+        Assertions.assertTrue(filmStorage.getAll().size()==2);
+    }
 }
