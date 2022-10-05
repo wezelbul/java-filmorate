@@ -15,6 +15,7 @@ public class DbLikeStorage implements LikeStorage {
     private final JdbcTemplate filmLikes;
     private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/film/like/";
     private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
+    private static final String SELECT_COMMON_FILMS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_common_films.sql");
     private static final String SELECT_COUNT_LIMIT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_count_limit.sql");
     private static final String SELECT_COUNT_LIMIT_GENRE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_count_limit_genre.sql");
     private static final String SELECT_COUNT_LIMIT_YEAR_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_count_limit_year.sql");
@@ -68,6 +69,11 @@ public class DbLikeStorage implements LikeStorage {
     @Override
     public List<Film> getMostPopularFilmsGenreYear(Integer count, Integer genreId, Integer year) {
         return filmLikes.query(SELECT_COUNT_LIMIT_GENRE_YEAR_SQL_QUERY, new FilmExtractor(), count, genreId, year);
+    }
+
+    @Override
+    public List<Film> getMostCommonFilms(Long userId, Long friendId) {
+        return filmLikes.query(SELECT_COMMON_FILMS_SQL_QUERY, new FilmExtractor(), userId, friendId);
     }
 
 }

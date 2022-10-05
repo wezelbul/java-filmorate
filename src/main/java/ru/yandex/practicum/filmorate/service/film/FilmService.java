@@ -137,4 +137,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
         }
     }
 
+    public List<Film> getMostCommonFilms(Long userId, Long friendId) {
+        return likeStorage.getMostCommonFilms(userId, friendId);
+    }
 }

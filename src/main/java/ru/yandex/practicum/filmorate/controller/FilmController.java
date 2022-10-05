@@ -60,4 +60,11 @@ public class FilmController extends AbstractDataController<Film, FilmService> {
         return ResponseEntity.ok(service.getMostPopularFilms(count, genreId, year));
     }
 
+    // Общие с другом фильмы
+    @GetMapping(value = "/common") //GET /films/common?userId={userId}&friendId={friendId}
+    public ResponseEntity<List<Film>> getMostCommonFilms(@Valid @RequestParam(required = false, name = "userId") Long userId,
+                                                          @Valid @RequestParam(required = false, name = "friendId") Long friendId) {
+        return ResponseEntity.ok(service.getMostCommonFilms(userId, friendId));
+    }
+
 }
