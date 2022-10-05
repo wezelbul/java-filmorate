@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.base.data.AbstractDataService;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
+import ru.yandex.practicum.filmorate.storage.director.DbDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.DbGenreStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
@@ -23,19 +24,24 @@ import java.util.stream.Collectors;
 public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
 
     private final DataStorage<User> userStorage;
+
     private final LikeStorage likeStorage;
     private final GenreStorage genreStorage;
+
+    private final DbDirectorStorage directorStorage;
 
     private final Integer defaultCountPopularFilms = 10;
 
     public FilmService(DbFilmStorage filmStorage,
                        DbUserStorage userStorage,
                        DbLikeStorage likeStorage,
-                       DbGenreStorage genreStorage) {
+                       DbGenreStorage genreStorage,
+                       DbDirectorStorage directorStorage) {
         super(filmStorage);
         this.userStorage = userStorage;
         this.likeStorage = likeStorage;
         this.genreStorage = genreStorage;
+        this.directorStorage = directorStorage;
     }
 
     @Override
@@ -61,6 +67,10 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
             result.add(userStorage.getById(id));
         }
         return result;
+    }
+
+    public List<Film> getFilmsByDirector(Integer directorId,String order){
+        return directorStorage.getFilmsByDirector(directorId,order);
     }
 
     @Override
