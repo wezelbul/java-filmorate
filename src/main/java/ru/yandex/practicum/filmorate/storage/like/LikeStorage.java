@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface LikeStorage extends LinkStorage {
     List<Film> getMostPopularFilms(Integer count);
+
+    List<Film> getMostCommonFilms(Long userId, Long friendId);
 }

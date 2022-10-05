@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class DbLikeStorage implements LikeStorage {
     private final JdbcTemplate filmLikes;
     private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/film/like/";
     private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
+    private static final String SELECT_COMMON_FILMS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_common_films.sql");
     private static final String SELECT_COUNT_LIMIT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_count_limit.sql");
     private static final String SELECT_ID_COUNT_LIMIT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_id_count_limit.sql");
     private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
@@ -49,6 +51,11 @@ public class DbLikeStorage implements LikeStorage {
     @Override
     public List<Film> getMostPopularFilms(Integer count) {
         return filmLikes.query(SELECT_COUNT_LIMIT_SQL_QUERY, new FilmMapper(), count);
+    }
+
+    @Override
+    public List<Film> getMostCommonFilms(Long userId, Long friendId) {
+        return filmLikes.query(SELECT_COMMON_FILMS_SQL_QUERY, new FilmExtractor(), userId, friendId);
     }
 
 }
