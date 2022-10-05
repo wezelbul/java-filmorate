@@ -96,4 +96,16 @@ public class UserService extends AbstractDataService<User, DbUserStorage> {
         }
         return recommendFilms;
     }
+    // список фильмов рекомендуемые пользователю
+    public List<Film> getUsersRecommendations(Long id) {
+        List<Long> recommendUserFilms = filmStorage.getUsersRecommendations(id);
+        List<Long> userFilms = filmStorage.getFilmsUserById(id);
+        recommendUserFilms.removeAll(userFilms);
+        List<Film> recommendFilms = new ArrayList<>();
+
+        for (Long indexFilm:recommendUserFilms) {
+            recommendFilms.add(filmStorage.getById(indexFilm));
+        }
+        return recommendFilms;
+    }
 }

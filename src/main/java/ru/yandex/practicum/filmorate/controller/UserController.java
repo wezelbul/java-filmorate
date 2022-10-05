@@ -89,4 +89,10 @@ public class UserController extends AbstractDataController<User, UserService> {
         return service.getUsersRecommendations(id);
     }
 
+    // список фильмов рекомендуемые пользователю
+    @GetMapping(value = "/{id}/recommendations")
+    public List<Film> getUsersRecommendations(@Valid @PathVariable Long id) {
+        return service.getUsersRecommendations(id);
+    }
+
 }
