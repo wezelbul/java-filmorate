@@ -116,11 +116,25 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
         return likeStorage.deleteLink(filmId, userId);
     }
 
-    public List<Film> getMostPopularFilms(Integer count) {
+    public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
         if (count == null) {
-            return getMostPopularFilms(defaultCountPopularFilms);
+            count = defaultCountPopularFilms;
         }
-        return likeStorage.getMostPopularFilms(count);
+
+        if (genreId == null && year == null) {
+            return likeStorage.getMostPopularFilms(count);
+        } else {
+
+            if (year == null) {
+                return likeStorage.getMostPopularFilmsGenre(count, genreId);
+            }
+
+            if (genreId == null) {
+                return likeStorage.getMostPopularFilmsYear(count, year);
+            }
+
+            return likeStorage.getMostPopularFilmsGenreYear(count, genreId, year);
+        }
     }
 
     public List<Film> getMostCommonFilms(Long userId, Long friendId) {
