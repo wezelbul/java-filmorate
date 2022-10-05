@@ -7,7 +7,9 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
 import ru.yandex.practicum.filmorate.util.UtilReader;
+
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -20,6 +22,10 @@ public class DbFilmStorage implements DataStorage<Film> {
     private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/film/";
     private static final String SELECT_ALL_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_all.sql");
     private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
+    private static final String SELECT_FAVORITE_FILMS_USER_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR +
+                                                                            "like/" + "select_favorite_movies_user_by_id.sql");
+    private static final String SELECT_RECOMMENDATIONS_FILMS_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR +
+                                                                            "select_recommendations_films_id.sql");
     private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
     private static final String UPDATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "update.sql");
 
@@ -34,7 +40,7 @@ public class DbFilmStorage implements DataStorage<Film> {
 
     @Override
     public Film getById(Long id) {
-        return films.query(SELECT_BY_ID_SQL_QUERY, new FilmMapper(), id).stream().findAny().orElse(null);
+        return films.query(SELECT_BY_ID_SQL_QUERY, new FilmExtractor(), id).stream().findAny().orElse(null);
     }
 
     @Override
@@ -74,4 +80,13 @@ public class DbFilmStorage implements DataStorage<Film> {
         return getById(object.getId());
     }
 
+    // Список фильмов пользователя, схожих по интересам
+    public List<Long> getUsersRecommendations(Long id) {
+        return films.queryForList(SELECT_RECOMMENDATIONS_FILMS_ID_SQL_QUERY, Long.class, id, id);
+    }
+
+    // список фильмов которые лайкнул пользователь
+    public List<Long> getFilmsUserById(Long id) {
+        return films.queryForList(SELECT_FAVORITE_FILMS_USER_ID_SQL_QUERY, Long.class, id);
+    }
 }

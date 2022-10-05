@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS films, users, film_likes, user_friends, film_genres, reviews, reviews_likes;
+
 SET MODE MySQL;
 
 CREATE TABLE IF NOT EXISTS genres
