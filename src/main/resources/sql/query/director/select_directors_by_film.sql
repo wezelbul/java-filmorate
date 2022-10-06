@@ -1,0 +1,3 @@
+SELECT DIRECTOR_ID
+FROM film_directors
+WHERE FILM_ID = ?

@@ -5,8 +5,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.util.UtilReader;
@@ -14,12 +16,15 @@ import ru.yandex.practicum.filmorate.util.UtilReader;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class DbDirectorStorage implements DirectorStorage{
 
     private final JdbcTemplate directors;
+
+    private final GenreStorage genreStorage;
 
     private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/director/";
     private static final String SELECT_ALL_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_all.sql");
@@ -31,9 +36,16 @@ public class DbDirectorStorage implements DirectorStorage{
 
     private static final String DELETE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete.sql");
 
+    private static final String DELETE_FROM_FILMS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete_from_films.sql");
+
     private static final String SELECT_BY_DIRECTOR_ORDER_BY_RATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_all_by_director_order_by_rate.sql");
 
     private static final String SELECT_BY_DIRECTOR_ORDER_BY_YEAR_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_all_by_director_order_by_year.sql");
+
+    private static final String SELECT_DIRECTORS_BY_FILM_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_directors_by_film.sql");
+
+    private static final String INSERT_INTO_FILM_DIRECTORS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert_into_film_directors.sql");
+
 
 
     @Override
@@ -71,21 +83,48 @@ public class DbDirectorStorage implements DirectorStorage{
 
     @Override
     public boolean delete(Integer directorId) {
+        directors.update(DELETE_FROM_FILMS_SQL_QUERY, directorId);
         directors.update(DELETE_SQL_QUERY, directorId);
         return true;
     }
 
     @Override
     public List<Film> getFilmsByDirector(Integer directorId, String order){
-        if(order.equals("likes")){
-            return directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE_SQL_QUERY,new FilmMapper(),directorId);
-        }else{
-            return directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR_SQL_QUERY,new FilmMapper(),directorId);
+        if(!contains(directorId)){
+            throw new DataObjectNotFoundException(directorId.longValue());
         }
+        List<Film> films ;
+        if(order.equals("likes")){
+            films =  directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE_SQL_QUERY,new FilmMapper(),directorId);
+            films.forEach(f -> f.setDirectors(getDirectorsByFilm(f)));
+            films.forEach(f -> f.setGenres(genreStorage.getGenresByFilm(f)));
+        }else{
+            films = directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR_SQL_QUERY,new FilmMapper(),directorId);
+            films.forEach(f -> f.setDirectors(getDirectorsByFilm(f)));
+            films.forEach(f -> f.setGenres(genreStorage.getGenresByFilm(f)));
+        }
+        return films;
+    }
+
+    @Override
+    public List<Director> getDirectorsByFilm(Film film) {
+        List<Integer> id = directors.queryForList(SELECT_DIRECTORS_BY_FILM_SQL_QUERY, Integer.class, film.getId());
+        return id.stream().map(this::getDirector).collect(Collectors.toList());
+    }
+
+    @Override
+    public void updateDirectorFilm(Integer id) {
+        directors.update(DELETE_FROM_FILMS_SQL_QUERY, id);
+    }
+
+    public void createDirectorByFilm(Long filmId,Integer directorId) {
+        directors.update(INSERT_INTO_FILM_DIRECTORS_SQL_QUERY, filmId, directorId);
     }
 
     @Override
     public boolean contains(Integer directorId) {
         return getDirector(directorId) != null;
     }
+
+
 }

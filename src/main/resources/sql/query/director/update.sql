@@ -1,3 +1,3 @@
 UPDATE directors
-SET name = ?
+SET director_name = ?
 WHERE director_id = ?

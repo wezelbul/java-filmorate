@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 
@@ -20,8 +19,8 @@ public class FilmMapper implements RowMapper<Film> {
                 rs.getDate("release_date").toLocalDate(),
                 rs.getInt("duration_in_minutes"),
                 new MpaRating(rs.getInt("mpa_rating_id"), rs.getString("mpa_name")),
-                new Director(rs.getInt("director_id"), rs.getString("director_name")),
                 rs.getLong("rate"),
+                new ArrayList<>(),
                 new ArrayList<>());
     }
 }

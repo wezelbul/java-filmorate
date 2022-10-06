@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
@@ -22,6 +23,7 @@ public class DbFilmStorage implements DataStorage<Film> {
     private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
     private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
     private static final String UPDATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "update.sql");
+
 
 
     public DbFilmStorage(JdbcTemplate films) {
@@ -57,9 +59,7 @@ public class DbFilmStorage implements DataStorage<Film> {
             preparedStatement.setDate(3, Date.valueOf(object.getReleaseDate()));
             preparedStatement.setInt(4, object.getDuration());
             preparedStatement.setInt(5, object.getMpa().getId());
-            preparedStatement.setInt(6,object.getDirector().getId());
             return preparedStatement;
-
         }, keyHolder);
 
         return getById(keyHolder.getKey().longValue());
@@ -73,10 +73,10 @@ public class DbFilmStorage implements DataStorage<Film> {
                 Date.valueOf(object.getReleaseDate()),
                 object.getDuration(),
                 object.getMpa().getId(),
-                object.getDirector().getId(),
                 object.getId());
         return getById(object.getId());
     }
+
 
 
 }

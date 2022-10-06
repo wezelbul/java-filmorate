@@ -67,3 +67,10 @@ CREATE TABLE IF NOT EXISTS film_genres
     genre_id INTEGER NOT NULL REFERENCES genres (genre_id),
     PRIMARY KEY (film_id, genre_id)
 );
+
+CREATE TABLE IF NOT EXISTS film_directors
+(
+    film_id LONG NOT NULL REFERENCES films (film_id),
+    director_id INTEGER NOT NULL REFERENCES directors (director_id),
+    PRIMARY KEY (film_id, director_id)
+    );

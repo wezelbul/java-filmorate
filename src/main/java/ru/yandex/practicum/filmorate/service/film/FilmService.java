@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.film;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
@@ -57,7 +58,13 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
                 genreStorage.setGenres(result.getId(), genre.getId());
             }
         }
+        if(film.getDirectors()!=null){
+            for (Director director : film.getDirectors()) {
+                directorStorage.createDirectorByFilm(result.getId(), director.getId());
+            }
+        }
         result.setGenres(genreStorage.getFilmGenres(result.getId()));
+        result.setDirectors(directorStorage.getDirectorsByFilm(result));
         return result;
     }
 
@@ -69,20 +76,27 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
         return result;
     }
 
-    public List<Film> getFilmsByDirector(Integer directorId,String order){
-        return directorStorage.getFilmsByDirector(directorId,order);
+    public List<Film> getFilmsByDirector(Integer directorId,String sortBy){
+        return directorStorage.getFilmsByDirector(directorId,sortBy);
     }
 
     @Override
     public Film update(Film film) {
         genreStorage.clearFilmGenres(film.getId());
+        directorStorage.updateDirectorFilm(film.getId().intValue());
         Film result = super.update(film);
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 genreStorage.setGenres(result.getId(), genre.getId());
             }
         }
+        if(film.getDirectors()!=null){
+            for (Director director : film.getDirectors()) {
+                directorStorage.createDirectorByFilm(result.getId(), director.getId());
+            }
+        }
         result.setGenres(genreStorage.getFilmGenres(result.getId()));
+        result.setDirectors(directorStorage.getDirectorsByFilm(result));
         return result;
     }
 
@@ -90,6 +104,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
     public Film getById(Long id) {
         Film result = super.getById(id);
         result.setGenres(genreStorage.getFilmGenres(result.getId()));
+        result.setDirectors(directorStorage.getDirectorsByFilm(result));
         return result;
     }
 
@@ -100,6 +115,9 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
             for (Long filmId : map.keySet()) {
                 filmMap.get(filmId).getGenres().add(map.get(filmId));
             }
+        }
+        for(Film film:filmMap.values()){
+            film.setDirectors(directorStorage.getDirectorsByFilm(film));
         }
         return new ArrayList<>(filmMap.values());
     }
