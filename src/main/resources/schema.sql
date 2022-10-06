@@ -1,11 +1,4 @@
-DROP TABLE IF EXISTS mpa_rating CASCADE ;
-DROP TABLE IF EXISTS directors CASCADE;
-DROP TABLE IF EXISTS genres CASCADE ;
-DROP TABLE IF EXISTS  films CASCADE ;
-DROP TABLE IF EXISTS users CASCADE ;
-DROP TABLE IF EXISTS film_likes CASCADE ;
-DROP TABLE IF EXISTS  user_friends CASCADE ;
-DROP TABLE IF EXISTS  film_genres CASCADE ;
+DROP TABLE IF EXISTS films, users, film_likes, user_friends, film_genres, reviews, reviews_likes,directors,film_directors;
 
 SET MODE MySQL;
 
