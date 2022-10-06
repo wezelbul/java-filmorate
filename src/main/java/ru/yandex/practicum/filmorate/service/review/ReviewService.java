@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service.review;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
@@ -24,6 +23,8 @@ public class ReviewService {
     private final DbUserStorage dbUserStorage;
     private final DbReviewStorage dbReviewStorage;
 
+    private final Integer defaultCountReview = 10;
+
     // Добавление нового отзыва
     public Review createReview(Review review) {
         checkingForExistenceUser(review.getUserId());
@@ -32,15 +33,22 @@ public class ReviewService {
         return dbReviewStorage.createReview(review);
     }
 
-    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано, то 10.
-    @GetMapping
+    // Получение всех отзывов по идентификатору фильма, если фильм не указан, то все. Если кол-во не указано, то 10.
     public List<Review> getAllReviewByFilmId(Long filmId, Integer count) {
-        if (filmId != null) {
-            checkingForExistenceFilm(filmId);
+        if (count == null || count == 0) {
+            count = defaultCountReview;
         }
-        log.info("Получение списка из {} отзывов для фильма с ИД: {}", count, filmId);
-        return dbReviewStorage.getAllReviewByFilmId(filmId, count);
+        if (filmId == null) {
+            log.info("Получение списка из {} отзывов:", count);
+            return dbReviewStorage.getReview(count);
+        } else {
+            checkingForExistenceFilm(filmId);
+            log.info("Получение списка из {} отзывов для фильма с ИД: {}", count, filmId);
+            return dbReviewStorage.getReviewByFilmId(filmId, count);
+        }
     }
+
+
 
     // Получение отзыва по идентификатору
     public Review getReviewById(Long reviewId) {

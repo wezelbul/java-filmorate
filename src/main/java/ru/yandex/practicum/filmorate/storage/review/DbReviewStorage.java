@@ -1,38 +1,57 @@
 package ru.yandex.practicum.filmorate.storage.review;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.util.UtilReader;
 import ru.yandex.practicum.filmorate.model.Review;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-
 @Repository
 public class DbReviewStorage implements ReviewStorage {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate reviews;
+
+    // SQL запросы для отзывов (R)
+    private static final String R_SQL_QUERY_DIR = "src/main/resources/sql/query/review/";
+    private static final String R_INSERT_SQL_QUERY = UtilReader.readString(R_SQL_QUERY_DIR + "insert.sql");
+    private static final String R_SELECT_SQL_QUERY = UtilReader.readString(R_SQL_QUERY_DIR + "select.sql");
+    private static final String R_SELECT_BY_REVIEW_ID_SQL_QUERY = UtilReader.readString(
+            R_SQL_QUERY_DIR + "select_by_review_id.sql");
+    private static final String R_SELECT_BY_FILM_ID_SQL_QUERY = UtilReader.readString(
+            R_SQL_QUERY_DIR + "select_by_film_id.sql");
+    private static final String R_UPDATE_SQL_QUERY = UtilReader.readString(R_SQL_QUERY_DIR + "update.sql");
+    private static final String R_DELETE_SQL_QUERY = UtilReader.readString(R_SQL_QUERY_DIR + "delete.sql");
+
+    // SQL запросы по лайкам и дизлайкам для отзывов (L)
+    private static final String L_SQL_QUERY_DIR = "src/main/resources/sql/query/review/like/";
+    private static final String L_INSERT_SQL_QUERY = UtilReader.readString(L_SQL_QUERY_DIR + "insert.sql");
+    private static final String L_DELETE_SQL_QUERY = UtilReader.readString(L_SQL_QUERY_DIR + "delete.sql");
+
+    // SQL запросы по изменению рейтинга для отзывов (U)
+    private static final String U_SQL_QUERY_DIR = "src/main/resources/sql/query/review/useful/";
+    private static final String U_UPDATE_INCREASE_SQL_QUERY = UtilReader.readString(
+            U_SQL_QUERY_DIR + "update_increase.sql");
+    private static final String U_UPDATE_DECREASE_SQL_QUERY = UtilReader.readString(
+            U_SQL_QUERY_DIR + "update_decrease.sql");
 
     @Autowired
-    public DbReviewStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public DbReviewStorage(JdbcTemplate reviews) {
+        this.reviews = reviews;
     }
 
     // Добавление нового отзыва
     @Override
     public Review createReview(Review review) {
-        final String sqlQueryReview = "" +
-                "INSERT INTO reviews (content, is_positive, user_id, film_id, useful) " +
-                "VALUES (?, ?, ?, ?, ?)";
-
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQueryReview, new String[]{"review_id"});
+        reviews.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(R_INSERT_SQL_QUERY, new String[]{"review_id"});
             stmt.setString(1, review.getContent());
             stmt.setBoolean(2, review.getIsPositive());
             stmt.setLong(3, review.getUserId());
@@ -44,51 +63,30 @@ public class DbReviewStorage implements ReviewStorage {
         return getReviewById((Long) keyHolder.getKey());
     }
 
-    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано, то 10.
+    // Получение определённого количество отзывов
     @Override
-    public List<Review> getAllReviewByFilmId(Long filmId, Integer count) {
-        // Если есть идентификатор фильма указано
-        if (filmId != null) {
-            final String sqlQuery = "" +
-                    "SELECT review_id, content, is_positive, user_id, film_id, useful " +
-                    "FROM reviews " +
-                    "WHERE film_id = ?" +
-                    "ORDER BY useful DESC LIMIT ?";
-
-            return jdbcTemplate.query(sqlQuery, DbReviewStorage::makeReview, filmId, count);
-            // Если идентификатор фильма НЕ указан
-        } else {
-            final String sqlQuery = "" +
-                    "SELECT review_id, content, is_positive, user_id, film_id, useful " +
-                    "FROM reviews " +
-                    "ORDER BY useful DESC LIMIT ?";
-
-            return jdbcTemplate.query(sqlQuery, DbReviewStorage::makeReview, count);
-        }
+    public List<Review> getReview(Integer count) {
+        return reviews.query(R_SELECT_SQL_QUERY, DbReviewStorage::makeReview, count);
     }
 
     // Получение отзыва по идентификатору
     @Override
     public Review getReviewById(Long reviewId) {
-        final String sqlQueryFilm = "" +
-                "SELECT review_id, content, is_positive, user_id, film_id, useful " +
-                "FROM reviews " +
-                "WHERE review_id = ?";
-
-        List<Review> review = jdbcTemplate.query(sqlQueryFilm, DbReviewStorage::makeReview, reviewId);
+        List<Review> review = reviews.query(R_SELECT_BY_REVIEW_ID_SQL_QUERY, DbReviewStorage::makeReview, reviewId);
 
         return review.stream().findAny().orElse(null);
+    }
+
+    // Получение определённое количество отзывов по идентификатору фильма
+    @Override
+    public List<Review> getReviewByFilmId(Long filmId, Integer count) {
+        return reviews.query(R_SELECT_BY_FILM_ID_SQL_QUERY, DbReviewStorage::makeReview, filmId, count);
     }
 
     // Редактирование уже имеющегося отзыва
     @Override
     public Review updateReview(Review review) {
-        final String sqlQuery = "" +
-                "UPDATE reviews " +
-                "SET content = ?, is_positive = ?" +
-                "WHERE review_id = ?";
-
-        jdbcTemplate.update(sqlQuery,
+        reviews.update(R_UPDATE_SQL_QUERY,
                 review.getContent(),
                 review.getIsPositive(),
                 review.getReviewId());
@@ -99,57 +97,39 @@ public class DbReviewStorage implements ReviewStorage {
     // Удаление уже имеющегося отзыва по идентификатору
     @Override
     public void deleteReviewById(Long reviewId) {
-        final String sqlQuery = "DELETE FROM reviews WHERE review_id = ?";
-
-        jdbcTemplate.update(sqlQuery, reviewId);
+        reviews.update(R_DELETE_SQL_QUERY, reviewId);
     }
 
     // Пользователь ставит лайк отзыву
     @Override
     public void likeReview(Long reviewId, Long userId) {
-        final String sqlQueryInsertLike = "INSERT INTO reviews_likes (review_id, user_id, is_like) values (?,?,?)";
+        reviews.update(L_INSERT_SQL_QUERY, reviewId, userId, true);
 
-        jdbcTemplate.update(sqlQueryInsertLike, reviewId, userId, true);
-
-        final String sqlQueryIncreaseUseful = "UPDATE reviews set useful = useful + 1 where review_id = ?";
-
-        jdbcTemplate.update(sqlQueryIncreaseUseful, reviewId);
+        reviews.update(U_UPDATE_INCREASE_SQL_QUERY, reviewId);
     }
 
     // Пользователь ставит дизлайк отзыву
     @Override
     public void dislikeReview(Long reviewId, Long userId) {
-        final String sqlQueryInsertDislike = "INSERT INTO reviews_likes (review_id, user_id, is_like) values (?,?,?)";
+        reviews.update(L_INSERT_SQL_QUERY, reviewId, userId, false);
 
-        jdbcTemplate.update(sqlQueryInsertDislike, reviewId, userId, false);
-
-        final String sqlQueryDecreaseUseful = "UPDATE reviews set useful = useful - 1 where review_id = ?";
-
-        jdbcTemplate.update(sqlQueryDecreaseUseful, reviewId);
+        reviews.update(U_UPDATE_DECREASE_SQL_QUERY, reviewId);
     }
 
     // Пользователь удаляет лайк отзыву
     @Override
     public void deleteLikeReview(Long reviewId, Long userId) {
-        final String sqlQueryDeleteLike = "DELETE FROM reviews_likes WHERE review_id = ? and user_id = ?";
+        reviews.update(L_DELETE_SQL_QUERY, reviewId, userId);
 
-        jdbcTemplate.update(sqlQueryDeleteLike, reviewId, userId);
-
-        final String sqlQueryDecreaseUseful = "UPDATE reviews set useful = useful - 1 where review_id = ?";
-
-        jdbcTemplate.update(sqlQueryDecreaseUseful, reviewId);
+        reviews.update(U_UPDATE_DECREASE_SQL_QUERY, reviewId);
     }
 
     // Пользователь удаляет дизлайк отзыву
     @Override
     public void deleteDislikeReview(Long reviewId, Long userId) {
-        final String sqlQueryDeleteDislike = "DELETE FROM reviews_likes WHERE review_id = ? and user_id = ?";
+        reviews.update(L_DELETE_SQL_QUERY, reviewId, userId);
 
-        jdbcTemplate.update(sqlQueryDeleteDislike, reviewId, userId);
-
-        final String sqlQueryIncreaseUseful = "UPDATE reviews set useful = useful + 1 where review_id = ?";
-
-        jdbcTemplate.update(sqlQueryIncreaseUseful, reviewId);
+        reviews.update(U_UPDATE_INCREASE_SQL_QUERY, reviewId);
     }
 
     // Проверка на существование отзыва

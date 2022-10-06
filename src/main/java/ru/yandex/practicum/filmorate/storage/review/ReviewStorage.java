@@ -12,11 +12,14 @@ public interface ReviewStorage {
     // Добавление нового отзыва
     Review createReview(Review review);
 
-    // Получение всех отзывов по идентификатору фильма, если фильм не указан то все. Если кол-во не указано, то 10.
-    List<Review> getAllReviewByFilmId(Long filmId, Integer count);
+    // Получение определённого количество отзывов
+    List<Review> getReview(Integer count);
 
     // Получение отзыва по идентификатору
     Review getReviewById(Long reviewId);
+
+    // Получение определённое количество отзывов по идентификатору фильма
+    List<Review> getReviewByFilmId(Long filmId, Integer count);
 
     // Редактирование уже имеющегося отзыва
     Review updateReview(Review review);
