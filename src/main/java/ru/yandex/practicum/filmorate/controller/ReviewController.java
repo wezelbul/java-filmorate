@@ -27,7 +27,7 @@ public class ReviewController {
     public List<Review> getAllReviewByFilmId(
             @RequestParam(required = false) Long filmId,
             @RequestParam(required = false) Integer count) {
-        return reviewService.getAllReviewByFilmId(filmId, count);
+        return reviewService.getReview(filmId, count);
     }
 
     // Получение отзыва по идентификатору

@@ -34,7 +34,7 @@ public class ReviewService {
     }
 
     // Получение всех отзывов по идентификатору фильма, если фильм не указан, то все. Если кол-во не указано, то 10.
-    public List<Review> getAllReviewByFilmId(Long filmId, Integer count) {
+    public List<Review> getReview(Long filmId, Integer count) {
         if (count == null || count == 0) {
             count = defaultCountReview;
         }
