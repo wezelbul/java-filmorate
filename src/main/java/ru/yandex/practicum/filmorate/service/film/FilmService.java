@@ -90,7 +90,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
                 genreStorage.setGenres(film.getId(), genre.getId());
             }
         }
-        if(film.getDirectors()!=null){
+        if(film.getDirectors() != null){
             for (Director director : film.getDirectors()) {
                 directorStorage.createDirectorByFilm(result.getId(), director.getId());
             }
@@ -102,10 +102,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
 
     @Override
     public Film getById(Long id) {
-        Film result = super.getById(id);
-        result.setGenres(genreStorage.getFilmGenres(result.getId()));
-        result.setDirectors(directorStorage.getDirectorsByFilm(result));
-        return result;
+        return super.getById(id);
     }
 
     @Override

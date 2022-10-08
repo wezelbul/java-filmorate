@@ -6,7 +6,7 @@ import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public class FilmMapper implements RowMapper<Film> {
 
@@ -20,7 +20,7 @@ public class FilmMapper implements RowMapper<Film> {
                 rs.getInt("duration_in_minutes"),
                 new MpaRating(rs.getInt("mpa_rating_id"), rs.getString("mpa_name")),
                 rs.getLong("rate"),
-                new ArrayList<>(),
-                new ArrayList<>());
+                new HashSet<>(),
+                new HashSet<>());
     }
 }

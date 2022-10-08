@@ -7,10 +7,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class DbGenreStorage implements GenreStorage {
@@ -29,8 +26,8 @@ public class DbGenreStorage implements GenreStorage {
     }
 
     @Override
-    public List<Genre> getFilmGenres(Long filmId) {
-        return genres.query(SELECT_FILM_GENRES_SQL_QUERY, new GenreMapper(), filmId);
+    public Set<Genre> getFilmGenres(Long filmId) {
+        return new HashSet<>(genres.query(SELECT_FILM_GENRES_SQL_QUERY, new GenreMapper(), filmId));
     }
 
     @Override
@@ -69,14 +66,5 @@ public class DbGenreStorage implements GenreStorage {
     @Override
     public boolean contains(Integer genreId) {
         return getGenre(genreId) != null;
-    }
-
-    public List<Genre> getGenresByFilm(Film film) {
-        String sql =
-                "SELECT GEN.genre_id, GEN.genre_name " +
-                        "FROM genres GEN " +
-                        "NATURAL JOIN film_genres fg " +
-                        "WHERE fg.film_id = ?";
-        return new ArrayList<>(genres.query(sql, new GenreMapper(), film.getId()));
     }
 }

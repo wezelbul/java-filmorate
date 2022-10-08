@@ -4,10 +4,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
-import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -32,12 +31,12 @@ public class DbFilmStorage implements DataStorage<Film> {
 
     @Override
     public List<Film> getAll() {
-        return films.query(SELECT_ALL_SQL_QUERY, new FilmMapper());
+        return films.query(SELECT_ALL_SQL_QUERY, new FilmExtractor());
     }
 
     @Override
     public Film getById(Long id) {
-        return films.query(SELECT_BY_ID_SQL_QUERY, new FilmMapper(), id).stream().findAny().orElse(null);
+        return films.query(SELECT_BY_ID_SQL_QUERY, new FilmExtractor(), id).stream().findAny().orElse(null);
     }
 
 

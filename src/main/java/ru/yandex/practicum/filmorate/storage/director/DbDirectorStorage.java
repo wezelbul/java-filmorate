@@ -10,12 +10,13 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.DirectorMapper;
-import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -95,21 +96,16 @@ public class DbDirectorStorage implements DirectorStorage{
         }
         List<Film> films ;
         if(order.equals("likes")){
-            films =  directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE_SQL_QUERY,new FilmMapper(),directorId);
-            films.forEach(f -> f.setDirectors(getDirectorsByFilm(f)));
-            films.forEach(f -> f.setGenres(genreStorage.getGenresByFilm(f)));
+            return directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE_SQL_QUERY,new FilmExtractor(),directorId);
         }else{
-            films = directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR_SQL_QUERY,new FilmMapper(),directorId);
-            films.forEach(f -> f.setDirectors(getDirectorsByFilm(f)));
-            films.forEach(f -> f.setGenres(genreStorage.getGenresByFilm(f)));
+            return directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR_SQL_QUERY,new FilmExtractor(),directorId);
         }
-        return films;
     }
 
     @Override
-    public List<Director> getDirectorsByFilm(Film film) {
+    public Set<Director> getDirectorsByFilm(Film film) {
         List<Integer> id = directors.queryForList(SELECT_DIRECTORS_BY_FILM_SQL_QUERY, Integer.class, film.getId());
-        return id.stream().map(this::getDirector).collect(Collectors.toList());
+        return id.stream().map(this::getDirector).collect(Collectors.toSet());
     }
 
     @Override

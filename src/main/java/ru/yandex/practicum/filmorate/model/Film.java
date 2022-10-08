@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.validation.annotation.AfterCinemaBirthday;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -42,8 +43,8 @@ public class Film implements DataModel {
 
     private Long rate;
 
-    private List<Genre> genres;
+    private Set<Genre> genres;
 
-    private List<Director> directors;
+    private Set<Director> directors;
 
 }

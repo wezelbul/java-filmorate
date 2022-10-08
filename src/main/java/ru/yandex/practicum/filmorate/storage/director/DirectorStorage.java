@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 
 import java.util.List;
+import java.util.Set;
 
 public interface DirectorStorage {
 
@@ -19,7 +20,7 @@ public interface DirectorStorage {
 
     List<Film> getFilmsByDirector(Integer directorId, String order);
 
-    List<Director> getDirectorsByFilm(Film film);
+    Set<Director> getDirectorsByFilm(Film film);
 
     void updateDirectorFilm(Integer id);
     boolean contains(Integer directorId);
