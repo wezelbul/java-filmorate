@@ -83,7 +83,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
     @Override
     public Film update(Film film) {
         genreStorage.clearFilmGenres(film.getId());
-        directorStorage.updateDirectorFilm(film.getId().intValue());
+        directorStorage.deleteDirectorFromOneFilm(film.getId().intValue());
         Film result = super.update(film);
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {

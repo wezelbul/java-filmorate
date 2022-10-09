@@ -46,6 +46,8 @@ public class DbDirectorStorage implements DirectorStorage{
 
     private static final String INSERT_INTO_FILM_DIRECTORS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert_into_film_directors.sql");
 
+    private static final String DELETE_DIRECTOR_FROM_ONE_FILM_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete_director_from_one_film.sql");
+
 
 
     @Override
@@ -97,11 +99,11 @@ public class DbDirectorStorage implements DirectorStorage{
         if(order.equals("likes")){
             films =  directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE_SQL_QUERY,new FilmMapper(),directorId);
             films.forEach(f -> f.setDirectors(getDirectorsByFilm(f)));
-            films.forEach(f -> f.setGenres(genreStorage.getGenresByFilm(f)));
+            films.forEach(f -> f.setGenres(genreStorage.getFilmGenres(f.getId())));
         }else{
             films = directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR_SQL_QUERY,new FilmMapper(),directorId);
             films.forEach(f -> f.setDirectors(getDirectorsByFilm(f)));
-            films.forEach(f -> f.setGenres(genreStorage.getGenresByFilm(f)));
+            films.forEach(f -> f.setGenres(genreStorage.getFilmGenres(f.getId())));
         }
         return films;
     }
@@ -112,13 +114,13 @@ public class DbDirectorStorage implements DirectorStorage{
         return id.stream().map(this::getDirector).collect(Collectors.toList());
     }
 
-    @Override
-    public void updateDirectorFilm(Integer id) {
-        directors.update(DELETE_FROM_FILMS_SQL_QUERY, id);
-    }
-
     public void createDirectorByFilm(Long filmId,Integer directorId) {
         directors.update(INSERT_INTO_FILM_DIRECTORS_SQL_QUERY, filmId, directorId);
+    }
+
+    @Override
+    public void deleteDirectorFromOneFilm(Integer id) {
+        directors.update(DELETE_DIRECTOR_FROM_ONE_FILM_SQL_QUERY, id);
     }
 
     @Override

@@ -21,6 +21,7 @@ public interface DirectorStorage {
 
     List<Director> getDirectorsByFilm(Film film);
 
-    void updateDirectorFilm(Integer id);
     boolean contains(Integer directorId);
+
+    void deleteDirectorFromOneFilm(Integer id);
 }

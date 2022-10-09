@@ -29,7 +29,6 @@ public class DirectorController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Director> create(@Valid @RequestBody Director director){
         return ResponseEntity.status(HttpStatus.CREATED).body(directorService.add(director));
     }

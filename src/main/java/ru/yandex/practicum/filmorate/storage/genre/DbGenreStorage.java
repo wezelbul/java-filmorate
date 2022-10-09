@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.genre;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
 import ru.yandex.practicum.filmorate.util.UtilReader;
@@ -71,12 +70,5 @@ public class DbGenreStorage implements GenreStorage {
         return getGenre(genreId) != null;
     }
 
-    public List<Genre> getGenresByFilm(Film film) {
-        String sql =
-                "SELECT GEN.genre_id, GEN.genre_name " +
-                        "FROM genres GEN " +
-                        "NATURAL JOIN film_genres fg " +
-                        "WHERE fg.film_id = ?";
-        return new ArrayList<>(genres.query(sql, new GenreMapper(), film.getId()));
-    }
+
 }

@@ -28,7 +28,7 @@ public class DirectorService {
     }
 
     public Director add(Director director){
-        if (getAll().contains(director)) {
+        if (contains(director.getId())) {
             throw new DataObjectAlreadyExistException("Такой режиссёр уже существует");
         }
         return directorStorage.add(director);
