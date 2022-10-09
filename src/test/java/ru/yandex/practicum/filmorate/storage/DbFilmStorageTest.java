@@ -29,6 +29,7 @@ public class DbFilmStorageTest {
             220,
             new MpaRating(1, "G"),
             null,
+            new ArrayList<>(),
             new ArrayList<>());
 
     @AfterEach
@@ -59,6 +60,7 @@ public class DbFilmStorageTest {
                 100,
                 new MpaRating(3, "PG-13"),
                 1L,
+                new ArrayList<>(),
                 new ArrayList<>());
         Assertions.assertEquals(film, filmStorage.getById(1L));
     }

@@ -1,0 +1,2 @@
+INSERT INTO film_directors (FILM_ID, DIRECTOR_ID)
+VALUES(?, ?)

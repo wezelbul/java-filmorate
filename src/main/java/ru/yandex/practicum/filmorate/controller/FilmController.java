@@ -67,4 +67,9 @@ public class FilmController extends AbstractDataController<Film, FilmService> {
         return ResponseEntity.ok(service.getMostCommonFilms(userId, friendId));
     }
 
+    @GetMapping(value = "/director/{directorId}")
+    public ResponseEntity<List<Film>> getFilmsByDirector(@Valid @PathVariable Integer directorId,@RequestParam String sortBy){
+        return ResponseEntity.ok(service.getFilmsByDirector(directorId,sortBy));
+    }
+
 }

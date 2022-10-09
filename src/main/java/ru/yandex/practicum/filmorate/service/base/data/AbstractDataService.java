@@ -14,9 +14,9 @@ import java.util.List;
 @Slf4j
 public abstract class AbstractDataService
         <
-        Model extends DataModel,
-        Storage extends DataStorage<Model>
-        >
+                Model extends DataModel,
+                Storage extends DataStorage<Model>
+                >
         implements DataService<Model> {
 
     protected final Storage objectStorage;
@@ -74,5 +74,4 @@ public abstract class AbstractDataService
         }
         return result;
     }
-
 }

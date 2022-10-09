@@ -3,11 +3,13 @@ package ru.yandex.practicum.filmorate.service.film;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.base.data.AbstractDataService;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
+import ru.yandex.practicum.filmorate.storage.director.DbDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.DbGenreStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
@@ -23,19 +25,24 @@ import java.util.stream.Collectors;
 public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
 
     private final DataStorage<User> userStorage;
+
     private final LikeStorage likeStorage;
     private final GenreStorage genreStorage;
+
+    private final DbDirectorStorage directorStorage;
 
     private final Integer defaultCountPopularFilms = 10;
 
     public FilmService(DbFilmStorage filmStorage,
                        DbUserStorage userStorage,
                        DbLikeStorage likeStorage,
-                       DbGenreStorage genreStorage) {
+                       DbGenreStorage genreStorage,
+                       DbDirectorStorage directorStorage) {
         super(filmStorage);
         this.userStorage = userStorage;
         this.likeStorage = likeStorage;
         this.genreStorage = genreStorage;
+        this.directorStorage = directorStorage;
     }
 
     @Override
@@ -51,7 +58,13 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
                 genreStorage.setGenres(result.getId(), genre.getId());
             }
         }
+        if(film.getDirectors()!=null){
+            for (Director director : film.getDirectors()) {
+                directorStorage.createDirectorByFilm(result.getId(), director.getId());
+            }
+        }
         result.setGenres(genreStorage.getFilmGenres(result.getId()));
+        result.setDirectors(directorStorage.getDirectorsByFilm(result));
         return result;
     }
 
@@ -63,16 +76,27 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
         return result;
     }
 
+    public List<Film> getFilmsByDirector(Integer directorId,String sortBy){
+        return directorStorage.getFilmsByDirector(directorId,sortBy);
+    }
+
     @Override
     public Film update(Film film) {
         genreStorage.clearFilmGenres(film.getId());
+        directorStorage.deleteDirectorFromOneFilm(film.getId().intValue());
+        Film result = super.update(film);
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 genreStorage.setGenres(film.getId(), genre.getId());
             }
         }
-        Film result = super.update(film);
+        if(film.getDirectors()!=null){
+            for (Director director : film.getDirectors()) {
+                directorStorage.createDirectorByFilm(result.getId(), director.getId());
+            }
+        }
         result.setGenres(genreStorage.getFilmGenres(result.getId()));
+        result.setDirectors(directorStorage.getDirectorsByFilm(result));
         return result;
     }
 
@@ -80,6 +104,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
     public Film getById(Long id) {
         Film result = super.getById(id);
         result.setGenres(genreStorage.getFilmGenres(result.getId()));
+        result.setDirectors(directorStorage.getDirectorsByFilm(result));
         return result;
     }
 
@@ -90,6 +115,9 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
             for (Long filmId : map.keySet()) {
                 filmMap.get(filmId).getGenres().add(map.get(filmId));
             }
+        }
+        for(Film film:filmMap.values()){
+            film.setDirectors(directorStorage.getDirectorsByFilm(film));
         }
         return new ArrayList<>(filmMap.values());
     }

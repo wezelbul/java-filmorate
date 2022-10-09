@@ -69,4 +69,6 @@ public class DbGenreStorage implements GenreStorage {
     public boolean contains(Integer genreId) {
         return getGenre(genreId) != null;
     }
+
+
 }

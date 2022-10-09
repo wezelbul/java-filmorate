@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
@@ -23,6 +24,8 @@ public class DbFilmStorage implements DataStorage<Film> {
     private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
     private static final String UPDATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "update.sql");
 
+
+
     public DbFilmStorage(JdbcTemplate films) {
         this.films = films;
     }
@@ -36,6 +39,7 @@ public class DbFilmStorage implements DataStorage<Film> {
     public Film getById(Long id) {
         return films.query(SELECT_BY_ID_SQL_QUERY, new FilmMapper(), id).stream().findAny().orElse(null);
     }
+
 
     @Override
     public boolean contains(Long id) {
@@ -56,7 +60,6 @@ public class DbFilmStorage implements DataStorage<Film> {
             preparedStatement.setInt(4, object.getDuration());
             preparedStatement.setInt(5, object.getMpa().getId());
             return preparedStatement;
-
         }, keyHolder);
 
         return getById(keyHolder.getKey().longValue());
@@ -73,5 +76,7 @@ public class DbFilmStorage implements DataStorage<Film> {
                 object.getId());
         return getById(object.getId());
     }
+
+
 
 }
