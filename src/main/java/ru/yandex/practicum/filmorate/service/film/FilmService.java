@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.film;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.search.SearchEmptyRequestParamException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -15,7 +16,6 @@ import ru.yandex.practicum.filmorate.storage.genre.DbGenreStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.DbLikeStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
-import ru.yandex.practicum.filmorate.storage.search.SearchStorage;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
 
 import java.util.*;
@@ -29,7 +29,6 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
 
     private final LikeStorage likeStorage;
     private final GenreStorage genreStorage;
-    private final SearchStorage searchStorage;
 
     private final DbDirectorStorage directorStorage;
 
@@ -39,14 +38,12 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
                        DbUserStorage userStorage,
                        DbLikeStorage likeStorage,
                        DbGenreStorage genreStorage,
-                       DbDirectorStorage directorStorage,
-                       SearchStorage searchStorage) {
+                       DbDirectorStorage directorStorage) {
         super(filmStorage);
         this.userStorage = userStorage;
         this.likeStorage = likeStorage;
         this.genreStorage = genreStorage;
         this.directorStorage = directorStorage;
-        this.searchStorage=searchStorage;
     }
 
     @Override
@@ -62,7 +59,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
                 genreStorage.setGenres(result.getId(), genre.getId());
             }
         }
-        if(film.getDirectors()!=null){
+        if (film.getDirectors() != null) {
             for (Director director : film.getDirectors()) {
                 directorStorage.createDirectorByFilm(result.getId(), director.getId());
             }
@@ -80,8 +77,8 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
         return result;
     }
 
-    public List<Film> getFilmsByDirector(Integer directorId,String sortBy){
-        return directorStorage.getFilmsByDirector(directorId,sortBy);
+    public List<Film> getFilmsByDirector(Integer directorId, String sortBy) {
+        return directorStorage.getFilmsByDirector(directorId, sortBy);
     }
 
     @Override
@@ -94,7 +91,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
                 genreStorage.setGenres(film.getId(), genre.getId());
             }
         }
-        if(film.getDirectors()!=null){
+        if (film.getDirectors() != null) {
             for (Director director : film.getDirectors()) {
                 directorStorage.createDirectorByFilm(result.getId(), director.getId());
             }
@@ -120,7 +117,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
                 filmMap.get(filmId).getGenres().add(map.get(filmId));
             }
         }
-        for(Film film:filmMap.values()){
+        for (Film film : filmMap.values()) {
             film.setDirectors(directorStorage.getDirectorsByFilm(film));
         }
         return new ArrayList<>(filmMap.values());
@@ -173,7 +170,50 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
         return likeStorage.getMostCommonFilms(userId, friendId);
     }
 
-    public List<Film> getFoundFilms(String query,List<String> by){
-        return searchStorage.getFoundFilms(query,by);
+    public List<Film> getFoundFilms(String query, List<String> by) {
+        List<Film> filmList = new ArrayList<>();
+        List<Film> allFilms = super.getAll();
+        query = query.toLowerCase();
+
+        if (query == null || query.isEmpty()) {
+            throw new SearchEmptyRequestParamException();
+        }
+        if (by == null || by.isEmpty()) {
+            throw new SearchEmptyRequestParamException();
+        }
+
+        if (by.size() == 2) {
+            filmList.addAll(findFilmByTitle(query, allFilms));
+            filmList.addAll(findFilmByDirector(query, allFilms));
+        } else if (by.get(0).equals("title")) {
+            filmList.addAll(findFilmByTitle(query, allFilms));
+        } else {
+            filmList.addAll(findFilmByDirector(query, allFilms));
+        }
+        return filmList.stream()
+                .sorted((f1, f2) -> Integer.compare(Math.toIntExact(f2.getRate()), Math.toIntExact(f1.getRate())))
+                .collect(Collectors.toList());
+    }
+
+    public List<Film> findFilmByTitle(String query, List<Film> allFilms) {
+        List<Film> filmList = new ArrayList<>();
+        for (Film film : allFilms) {
+            if (film.getName().toLowerCase().contains(query)) {
+                film.setDirectors(directorStorage.getDirectorsByFilm(film));
+                filmList.add(film);
+            }
+        }
+        return filmList;
+    }
+
+    public List<Film> findFilmByDirector(String query, List<Film> allFilms) {
+        List<Director> DL = directorStorage.getDirectorList();
+        List<Film> filmsByDirector = new ArrayList<>();
+        for (Director director : DL) {
+            if (director.getName().toLowerCase().contains(query)) {
+                filmsByDirector.addAll(directorStorage.getFilmsByDirector(director.getId(), "likes"));
+            }
+        }
+        return filmsByDirector;
     }
 }
