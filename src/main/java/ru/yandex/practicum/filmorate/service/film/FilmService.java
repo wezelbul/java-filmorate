@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.genre.DbGenreStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.DbLikeStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
+import ru.yandex.practicum.filmorate.storage.search.SearchStorage;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
 
 import java.util.*;
@@ -28,6 +29,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
 
     private final LikeStorage likeStorage;
     private final GenreStorage genreStorage;
+    private final SearchStorage searchStorage;
 
     private final DbDirectorStorage directorStorage;
 
@@ -37,12 +39,14 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
                        DbUserStorage userStorage,
                        DbLikeStorage likeStorage,
                        DbGenreStorage genreStorage,
-                       DbDirectorStorage directorStorage) {
+                       DbDirectorStorage directorStorage,
+                       SearchStorage searchStorage) {
         super(filmStorage);
         this.userStorage = userStorage;
         this.likeStorage = likeStorage;
         this.genreStorage = genreStorage;
         this.directorStorage = directorStorage;
+        this.searchStorage=searchStorage;
     }
 
     @Override
@@ -167,5 +171,9 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
 
     public List<Film> getMostCommonFilms(Long userId, Long friendId) {
         return likeStorage.getMostCommonFilms(userId, friendId);
+    }
+
+    public List<Film> getFoundFilms(String query,List<String> by){
+        return searchStorage.getFoundFilms(query,by);
     }
 }

@@ -72,4 +72,10 @@ public class FilmController extends AbstractDataController<Film, FilmService> {
         return ResponseEntity.ok(service.getFilmsByDirector(directorId,sortBy));
     }
 
+    @GetMapping(value = "/search")
+    public ResponseEntity<List<Film>> getFoundFilms(@Valid @RequestParam String query,
+                                                    @Valid @RequestParam List<String> by) {
+        return ResponseEntity.ok(service.getFoundFilms(query,by));
+    }
+
 }
