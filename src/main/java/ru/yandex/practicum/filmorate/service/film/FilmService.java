@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
 import ru.yandex.practicum.filmorate.storage.director.DbDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.DbGenreStorage;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.DbLikeStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
@@ -27,7 +26,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
     private final DataStorage<User> userStorage;
 
     private final LikeStorage likeStorage;
-    private final GenreStorage genreStorage;
+    private final DbGenreStorage genreStorage;
 
     private final DbDirectorStorage directorStorage;
 
