@@ -76,6 +76,11 @@ public class FilmController extends AbstractDataController<Film, FilmService> {
     public ResponseEntity<List<Film>> getFoundFilms(@Valid @RequestParam String query,
                                                     @Valid @RequestParam List<String> by) {
         return ResponseEntity.ok(service.getFoundFilms(query,by));
+
+    @DeleteMapping(value = "/{id}")
+    public void deleteFilm (@Valid @PathVariable Long id) {
+        service.deleteFilm(id);
+
     }
 
 }

@@ -16,4 +16,6 @@ public interface DataStorage<Model extends DataModel> {
 
     Model update(Model object);
 
+    boolean delete(Long filmId);
+
 }

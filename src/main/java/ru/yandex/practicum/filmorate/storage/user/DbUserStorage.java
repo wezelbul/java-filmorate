@@ -25,6 +25,7 @@ public class DbUserStorage implements DataStorage<User> {
     private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
     private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
     private static final String UPDATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "update.sql");
+    private static final String DELETE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete.sql");
 
     public DbUserStorage(JdbcTemplate users) {
         this.users = users;
@@ -82,6 +83,12 @@ public class DbUserStorage implements DataStorage<User> {
                 Date.valueOf(object.getBirthday()),
                 object.getId());
         return getById(object.getId());
+    }
+
+    @Override
+    public boolean delete(Long userId) {
+        users.update(DELETE_SQL_QUERY,userId);
+        return true;
     }
 
 }

@@ -169,6 +169,16 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
     public List<Film> getMostCommonFilms(Long userId, Long friendId) {
         return likeStorage.getMostCommonFilms(userId, friendId);
     }
+    
+    public boolean deleteFilm(Long filmId) {
+        if (!contains(filmId)) {
+            throw new DataObjectNotFoundException(filmId);
+        }
+        genreStorage.clearFilmGenres(filmId);
+        likeStorage.deleteAllLikesOfFilm(filmId);
+        directorStorage.deleteDirectorFromOneFilm(filmId.intValue());
+        return super.delete(filmId);
+    }
 
     public List<Film> getFoundFilms(String query, List<String> by) {
         List<Film> filmList = new ArrayList<>();
@@ -215,5 +225,6 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
             }
         }
         return filmsByDirector;
-    }
+
+
 }
