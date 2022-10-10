@@ -16,7 +16,6 @@ import java.util.Objects;
 public class DbFriendStorage implements FriendStorage {
 
     private final JdbcTemplate userFriends;
-    private final DbUserStorage dbUserStorage;
 
     private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/user/friend/";
     private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(
@@ -36,10 +35,11 @@ public class DbFriendStorage implements FriendStorage {
             SQL_QUERY_DIR + "delete_all_friends_of_user.sql");
     private static final String DELETE_USER_FROM_ALL_FRIENDS_QUERY = UtilReader.readString(
             SQL_QUERY_DIR + "delete_user_from_all_friends.sql");
+    private static final String SELECT_USER_BY_ID_SQL_QUERY =
+            UtilReader.readString( "src/main/resources/sql/query/user/select_by_id.sql");
 
-    public DbFriendStorage(JdbcTemplate userFriends, DbUserStorage dbUserStorage) {
+    public DbFriendStorage(JdbcTemplate userFriends) {
         this.userFriends = userFriends;
-        this.dbUserStorage = dbUserStorage;
     }
 
     @Override
@@ -73,7 +73,11 @@ public class DbFriendStorage implements FriendStorage {
 
     @Override
     public List<User> getFriends(Long userId) {
-        if(dbUserStorage.contains(userId)){
+        User user = userFriends.query(SELECT_USER_BY_ID_SQL_QUERY, new UserMapper(), userId)
+                .stream()
+                .findAny()
+                .orElse(null);
+        if(user!=null){
             return userFriends.query(SELECT_ALL_SQL_QUERY, new UserMapper(), userId);
         }
         throw new DataObjectNotFoundException(userId);
