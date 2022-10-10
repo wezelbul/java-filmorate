@@ -4,7 +4,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
@@ -23,8 +22,7 @@ public class DbFilmStorage implements DataStorage<Film> {
     private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
     private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
     private static final String UPDATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "update.sql");
-
-
+    private static final String DELETE_FILM = UtilReader.readString(SQL_QUERY_DIR + "delete_film.sql");
 
     public DbFilmStorage(JdbcTemplate films) {
         this.films = films;
@@ -77,6 +75,10 @@ public class DbFilmStorage implements DataStorage<Film> {
         return getById(object.getId());
     }
 
-
+    @Override
+    public boolean delete(Long filmId) {
+        films.update(DELETE_FILM,filmId);
+        return true;
+    }
 
 }

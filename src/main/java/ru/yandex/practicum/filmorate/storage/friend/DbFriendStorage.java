@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.storage.friend;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 
 import java.util.List;
@@ -29,6 +31,12 @@ public class DbFriendStorage implements FriendStorage {
     private static final String DELETE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete.sql");
     private static final String UPDATE_CONFIRMING_STATUS_SQL_QUERY = UtilReader.readString(
             SQL_QUERY_DIR + "update_confirming_status.sql");
+    private static final String DELETE_ALL_FRIENDS_OF_USER_SQL_QUERY = UtilReader.readString(
+            SQL_QUERY_DIR + "delete_all_friends_of_user.sql");
+    private static final String DELETE_USER_FROM_ALL_FRIENDS_QUERY = UtilReader.readString(
+            SQL_QUERY_DIR + "delete_user_from_all_friends.sql");
+    private static final String SELECT_USER_BY_ID_SQL_QUERY =
+            UtilReader.readString( "src/main/resources/sql/query/user/select_by_id.sql");
 
     public DbFriendStorage(JdbcTemplate userFriends) {
         this.userFriends = userFriends;
@@ -65,7 +73,14 @@ public class DbFriendStorage implements FriendStorage {
 
     @Override
     public List<User> getFriends(Long userId) {
-        return userFriends.query(SELECT_ALL_SQL_QUERY, new UserMapper(), userId);
+        User user = userFriends.query(SELECT_USER_BY_ID_SQL_QUERY, new UserMapper(), userId)
+                .stream()
+                .findAny()
+                .orElse(null);
+        if(user!=null){
+            return userFriends.query(SELECT_ALL_SQL_QUERY, new UserMapper(), userId);
+        }
+        throw new DataObjectNotFoundException(userId);
     }
 
     @Override
@@ -73,5 +88,10 @@ public class DbFriendStorage implements FriendStorage {
         return userFriends.query(SELECT_COMMON_SQL_QUERY, new UserMapper(), userId, friendId);
     }
 
-
+    @Override
+    public Boolean deleteAllFriendsOfUser(Long userId) {
+        userFriends.update(DELETE_ALL_FRIENDS_OF_USER_SQL_QUERY, userId);
+        userFriends.update(DELETE_USER_FROM_ALL_FRIENDS_QUERY, userId);
+        return true;
+    }
 }
