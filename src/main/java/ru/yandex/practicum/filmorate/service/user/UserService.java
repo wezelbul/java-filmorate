@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.base.data.AbstractDataService;
 import ru.yandex.practicum.filmorate.storage.friend.DbFriendStorage;
 import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
 
 import java.util.*;
@@ -15,11 +16,13 @@ import java.util.*;
 public class UserService extends AbstractDataService<User, DbUserStorage> {
 
     private final FriendStorage friendStorage;
+    private final LikeStorage likeStorage;
     private final Integer defaultCountPopularUsers = 10;
 
-    public UserService(DbUserStorage userStorage, DbFriendStorage friendStorage) {
+    public UserService(DbUserStorage userStorage, DbFriendStorage friendStorage,LikeStorage likeStorage) {
         super(userStorage);
         this.friendStorage = friendStorage;
+        this.likeStorage=likeStorage;
     }
 
     @Override
@@ -63,6 +66,15 @@ public class UserService extends AbstractDataService<User, DbUserStorage> {
 
     public List<User> getMostPopularUsers() {
         return getMostPopularUsers(defaultCountPopularUsers);
+    }
+
+    public boolean deleteUser(Long userId) {
+        if (!contains(userId)) {
+            throw new DataObjectNotFoundException(userId);
+        }
+        friendStorage.deleteAllFriendsOfUser(userId);
+        likeStorage.deleteAllLikesOfUser(userId);
+        return super.delete(userId);
     }
 
 }

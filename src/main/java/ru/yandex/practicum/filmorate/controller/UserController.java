@@ -76,4 +76,9 @@ public class UserController extends AbstractDataController<User, UserService> {
         return ResponseEntity.ok(service.getMostPopularUsers());
     }
 
+    @DeleteMapping(value = "/{id}")
+    public void deleteUser (@Valid @PathVariable Long id) {
+        service.deleteUser(id);
+    }
+
 }

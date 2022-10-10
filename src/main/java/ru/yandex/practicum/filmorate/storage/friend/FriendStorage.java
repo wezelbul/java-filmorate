@@ -10,5 +10,5 @@ public interface FriendStorage extends LinkStorage {
     Boolean getConfirmingStatus(Long userId, Long friendId);
     List<User> getFriends(Long userId);
     List<User> getCommonFriends(Long userId, Long friendId);
-
+    Boolean deleteAllFriendsOfUser(Long userId);
 }
