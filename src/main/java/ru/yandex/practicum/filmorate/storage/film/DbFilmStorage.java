@@ -80,15 +80,6 @@ public class DbFilmStorage implements DataStorage<Film> {
         return getById(object.getId());
     }
 
-    // Список фильмов пользователя, схожих по интересам
-    public List<Long> getUsersRecommendations(Long id) {
-        return films.queryForList(SELECT_RECOMMENDATIONS_FILMS_ID_SQL_QUERY, Long.class, id, id);
-    }
-
-    // список фильмов которые лайкнул пользователь
-    public List<Long> getFilmsUserById(Long id) {
-        return films.queryForList(SELECT_FAVORITE_FILMS_USER_ID_SQL_QUERY, Long.class, id);
-    }
     @Override
     public boolean delete(Long filmId) {
         films.update(DELETE_FILM,filmId);

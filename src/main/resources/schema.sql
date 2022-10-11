@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS films, users, film_likes, user_friends, film_genres, reviews, reviews_likes;
+DROP TABLE IF EXISTS films, users, film_likes, user_friends, film_genres, reviews, reviews_likes,directors,film_directors;
 
 SET MODE MySQL;
 
