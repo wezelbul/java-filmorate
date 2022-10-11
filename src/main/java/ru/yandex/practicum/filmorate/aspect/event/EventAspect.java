@@ -1,24 +1,26 @@
 package ru.yandex.practicum.filmorate.aspect.event;
 
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.event.EventOperationException;
 import ru.yandex.practicum.filmorate.exception.event.EventTypeException;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.event.DbEventStorage;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
+import ru.yandex.practicum.filmorate.storage.review.DbReviewStorage;
+import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 
 import java.time.Instant;
+import java.util.Calendar;
 
 @Component
 @Aspect
 public class EventAspect {
 
     private final EventStorage eventStorage;
+    private final ReviewStorage reviewStorage;
 
     private static final String ADD_OPERATION = "ADD";
     private static final String REMOVE_OPERATION = "REMOVE";
@@ -27,8 +29,9 @@ public class EventAspect {
     private static final String REVIEW_TYPE = "REVIEW";
     private static final String FRIEND_TYPE = "FRIEND";
 
-    public EventAspect(DbEventStorage eventStorage) {
+    public EventAspect(DbEventStorage eventStorage, DbReviewStorage reviewStorage) {
         this.eventStorage = eventStorage;
+        this.reviewStorage = reviewStorage;
     }
 
     @Pointcut("execution(* ru.yandex.practicum.filmorate.service.film.FilmService.addLike(Long, Long))")
@@ -83,8 +86,8 @@ public class EventAspect {
 
     @AfterReturning("executeEventAddLike()")
     public void recordEventAddLike(JoinPoint jp) {
-        Long userId = (Long) jp.getArgs()[0];
-        Long entityId = (Long) jp.getArgs()[1];
+        Long userId = (Long) jp.getArgs()[1];
+        Long entityId = (Long) jp.getArgs()[0];
         addEvent(userId,
                 entityId,
                 LIKE_TYPE,
@@ -93,8 +96,8 @@ public class EventAspect {
 
     @AfterReturning("executeEventRemoveLike()")
     public void recordEventRemoveLike(JoinPoint jp) {
-        Long userId = (Long) jp.getArgs()[0];
-        Long entityId = (Long) jp.getArgs()[1];
+        Long userId = (Long) jp.getArgs()[1];
+        Long entityId = (Long) jp.getArgs()[0];
         addEvent(userId,
                 entityId,
                 LIKE_TYPE,
@@ -103,8 +106,9 @@ public class EventAspect {
 
     @AfterReturning("executeEventAddReview()")
     public void recordEventAddReview(JoinPoint jp) {
-        Long userId = (Long) jp.getArgs()[0];
-        Long entityId = (Long) jp.getArgs()[1];
+        Review review = (Review) jp.getArgs()[0];
+        Long userId = review.getUserId();
+        Long entityId = reviewStorage.getReviewByUserIdAndFilmId(userId, review.getFilmId()).getReviewId();
         addEvent(userId,
                 entityId,
                 REVIEW_TYPE,
@@ -113,8 +117,8 @@ public class EventAspect {
 
     @Before("executeEventRemoveReview()")
     public void recordEventRemoveReview(JoinPoint jp) {
-        Long userId = (Long) jp.getArgs()[0];
-        Long entityId = (Long) jp.getArgs()[1];
+        Long entityId = (Long) jp.getArgs()[0];
+        Long userId = reviewStorage.getReviewById(entityId).getUserId();
         addEvent(userId,
                 entityId,
                 REVIEW_TYPE,
@@ -123,8 +127,9 @@ public class EventAspect {
 
     @AfterReturning("executeEventUpdateReview()")
     public void recordEventUpdateReview(JoinPoint jp) {
-        Long userId = (Long) jp.getArgs()[0];
-        Long entityId = (Long) jp.getArgs()[1];
+        Review review = (Review) jp.getArgs()[0];
+        Long entityId = review.getReviewId();
+        Long userId = reviewStorage.getReviewById(entityId).getUserId();
         addEvent(userId,
                 entityId,
                 REVIEW_TYPE,
@@ -141,6 +146,6 @@ public class EventAspect {
     }
 
     private long getCurrentTime() {
-        return Instant.now().getEpochSecond();
+        return Calendar.getInstance().getTimeInMillis();
     }
 }

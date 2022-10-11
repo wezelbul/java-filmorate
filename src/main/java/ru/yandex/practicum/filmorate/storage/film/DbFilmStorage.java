@@ -48,7 +48,6 @@ public class DbFilmStorage implements DataStorage<Film> {
     public Film add(Film object) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         films.update(connection -> {
-
             PreparedStatement preparedStatement = connection
                     .prepareStatement(INSERT_SQL_QUERY,
                             Statement.RETURN_GENERATED_KEYS);

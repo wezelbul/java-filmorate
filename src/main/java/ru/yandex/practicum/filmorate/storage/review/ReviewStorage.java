@@ -18,6 +18,9 @@ public interface ReviewStorage {
     // Получение отзыва по идентификатору
     Review getReviewById(Long reviewId);
 
+    // Получение отзыва по идентификаторам пользователя и фильма
+    Review getReviewByUserIdAndFilmId(Long userId, Long filmId);
+
     // Получение определённое количество отзывов по идентификатору фильма
     List<Review> getReviewByFilmId(Long filmId, Integer count);
 
