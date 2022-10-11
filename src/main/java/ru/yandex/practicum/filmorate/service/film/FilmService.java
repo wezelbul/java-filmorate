@@ -145,6 +145,7 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
     }
 
     public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
+
         if (count == null) {
             count = defaultCountPopularFilms;
         }
