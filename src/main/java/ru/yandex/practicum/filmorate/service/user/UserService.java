@@ -3,8 +3,11 @@ package ru.yandex.practicum.filmorate.service.user;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.base.data.AbstractDataService;
+import ru.yandex.practicum.filmorate.storage.event.DbEventStorage;
+import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.friend.DbFriendStorage;
 import ru.yandex.practicum.filmorate.storage.friend.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
@@ -15,11 +18,13 @@ import java.util.*;
 public class UserService extends AbstractDataService<User, DbUserStorage> {
 
     private final FriendStorage friendStorage;
+    private final EventStorage eventStorage;
     private final Integer defaultCountPopularUsers = 10;
 
-    public UserService(DbUserStorage userStorage, DbFriendStorage friendStorage) {
+    public UserService(DbUserStorage userStorage, DbFriendStorage friendStorage, DbEventStorage eventStorage) {
         super(userStorage);
         this.friendStorage = friendStorage;
+        this.eventStorage = eventStorage;
     }
 
     @Override
@@ -63,6 +68,10 @@ public class UserService extends AbstractDataService<User, DbUserStorage> {
 
     public List<User> getMostPopularUsers() {
         return getMostPopularUsers(defaultCountPopularUsers);
+    }
+
+    public List<Event> getFeed(Long userId) {
+        return eventStorage.getUserEvents(userId);
     }
 
 }

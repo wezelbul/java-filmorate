@@ -38,8 +38,6 @@ public class Film implements DataModel {
     @NotNull(message = "MPA rating can not be null")
     private MpaRating mpa;
 
-
-
     private Long rate;
 
     private List<Genre> genres;

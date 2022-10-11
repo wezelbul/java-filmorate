@@ -12,3 +12,13 @@ VALUES (1, 'Комедия'),
        (4, 'Триллер'),
        (5, 'Документальное'),
        (6, 'Боевик');
+
+INSERT IGNORE INTO event_types (event_type)
+VALUES ('LIKE'),
+       ('REVIEW'),
+       ('FRIEND');
+
+INSERT IGNORE INTO event_operations (event_operation)
+VALUES ('REMOVE'),
+       ('ADD'),
+       ('UPDATE');
