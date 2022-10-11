@@ -29,7 +29,7 @@ public class UserService extends AbstractDataService<User, DbUserStorage> {
         super(userStorage);
         this.friendStorage = friendStorage;
         this.filmStorage = filmStorage;
-        this.likeStorage=likeStorage;
+        this.likeStorage = likeStorage;
     }
 
     @Override
@@ -84,18 +84,6 @@ public class UserService extends AbstractDataService<User, DbUserStorage> {
         return super.delete(userId);
     }
 
-    // список фильмов рекомендуемые пользователю
-    public List<Film> getUsersRecommendations(Long id) {
-        List<Long> recommendUserFilms = filmStorage.getUsersRecommendations(id);
-        List<Long> userFilms = filmStorage.getFilmsUserById(id);
-        recommendUserFilms.removeAll(userFilms);
-        List<Film> recommendFilms = new ArrayList<>();
-
-        for (Long indexFilm:recommendUserFilms) {
-            recommendFilms.add(filmStorage.getById(indexFilm));
-        }
-        return recommendFilms;
-    }
     // список фильмов рекомендуемые пользователю
     public List<Film> getUsersRecommendations(Long id) {
         List<Long> recommendUserFilms = filmStorage.getUsersRecommendations(id);
