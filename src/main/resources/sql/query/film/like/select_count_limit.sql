@@ -26,4 +26,4 @@ WHERE FL.FILM_ID IN (SELECT F.FILM_ID
                      LIMIT ?)
 
 GROUP BY GENRE_NAME, FL.FILM_ID
-ORDER BY rate DESC, FL.FILM_ID, GENRE_NAME                 -- количество выгружаемых записей
+ORDER BY rate DESC, FL.FILM_ID, GENRE_ID                 -- количество выгружаемых записей

@@ -22,6 +22,7 @@ public class DbFilmStorage implements DataStorage<Film> {
     private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
     private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
     private static final String UPDATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "update.sql");
+    private static final String DELETE_FILM = UtilReader.readString(SQL_QUERY_DIR + "delete_film.sql");
 
     public DbFilmStorage(JdbcTemplate films) {
         this.films = films;
@@ -36,6 +37,7 @@ public class DbFilmStorage implements DataStorage<Film> {
     public Film getById(Long id) {
         return films.query(SELECT_BY_ID_SQL_QUERY, new FilmMapper(), id).stream().findAny().orElse(null);
     }
+
 
     @Override
     public boolean contains(Long id) {
@@ -73,6 +75,10 @@ public class DbFilmStorage implements DataStorage<Film> {
         return getById(object.getId());
     }
 
-
+    @Override
+    public boolean delete(Long filmId) {
+        films.update(DELETE_FILM,filmId);
+        return true;
+    }
 
 }
