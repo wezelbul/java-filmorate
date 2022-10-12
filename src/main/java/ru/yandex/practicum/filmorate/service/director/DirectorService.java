@@ -23,7 +23,7 @@ public class DirectorService {
         if (!contains(directorId)) {
             throw new DataObjectNotFoundException(directorId.longValue());
         }
-        return directorStorage.getDirector(directorId);
+        return directorStorage.getDirectorById(directorId);
     }
 
     public Director add(Director director){

@@ -11,7 +11,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.util.UtilReader;
+
+import static ru.yandex.practicum.filmorate.storage.director.DirectorRequests.*;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -24,28 +25,17 @@ public class DbDirectorStorage implements DirectorStorage {
 
     private final JdbcTemplate directors;
     private final GenreStorage genreStorage;
-
-    private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/director/";
-    private static final String SELECT_ALL_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_all.sql");
-    private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
-    private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
-    private static final String UPDATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "update.sql");
-    private static final String DELETE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete.sql");
-    private static final String DELETE_FROM_FILMS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete_from_films.sql");
-    private static final String SELECT_BY_DIRECTOR_ORDER_BY_RATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_all_by_director_order_by_rate.sql");
-    private static final String SELECT_BY_DIRECTOR_ORDER_BY_YEAR_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_all_by_director_order_by_year.sql");
-    private static final String SELECT_DIRECTORS_BY_FILM_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_directors_by_film.sql");
-    private static final String INSERT_INTO_FILM_DIRECTORS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert_into_film_directors.sql");
-    private static final String DELETE_DIRECTOR_FROM_ONE_FILM_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete_director_from_one_film.sql");
+    private final DirectorMapper directorMapper = new DirectorMapper();
+    private final FilmMapper filmMapper = new FilmMapper();
 
     @Override
     public List<Director> getDirectorList() {
-        return directors.query(SELECT_ALL_SQL_QUERY, new DirectorMapper());
+        return directors.query(SELECT_ALL.getSqlQuery(), directorMapper);
     }
 
     @Override
-    public Director getDirector(Integer directorId) {
-        return directors.query(SELECT_BY_ID_SQL_QUERY, new DirectorMapper(), directorId)
+    public Director getDirectorById(Integer directorId) {
+        return directors.query(SELECT_BY_ID.getSqlQuery(), directorMapper, directorId)
                 .stream().findAny().orElse(null);
     }
 
@@ -55,26 +45,26 @@ public class DbDirectorStorage implements DirectorStorage {
         directors.update(connection -> {
 
             PreparedStatement preparedStatement = connection
-                    .prepareStatement(INSERT_SQL_QUERY,
+                    .prepareStatement(INSERT.getSqlQuery(),
                             Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, object.getName());
             return preparedStatement;
         }, keyHolder);
-        return getDirector(keyHolder.getKey().intValue());
+        return getDirectorById(keyHolder.getKey().intValue());
     }
 
     @Override
     public Director update(Director object) {
-        directors.update(UPDATE_SQL_QUERY,
+        directors.update(UPDATE.getSqlQuery(),
                 object.getName(),
                 object.getId());
-        return getDirector(object.getId());
+        return getDirectorById(object.getId());
     }
 
     @Override
     public boolean delete(Integer directorId) {
-        directors.update(DELETE_FROM_FILMS_SQL_QUERY, directorId);
-        directors.update(DELETE_SQL_QUERY, directorId);
+        directors.update(DELETE_FROM_FILMS.getSqlQuery(), directorId);
+        directors.update(DELETE.getSqlQuery(), directorId);
         return true;
     }
 
@@ -85,9 +75,9 @@ public class DbDirectorStorage implements DirectorStorage {
         }
         List<Film> films;
         if (order.equals("likes")){
-            films = directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE_SQL_QUERY, new FilmMapper(), directorId);
+            films = directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE.getSqlQuery(), filmMapper, directorId);
         } else {
-            films = directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR_SQL_QUERY, new FilmMapper(), directorId);
+            films = directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR.getSqlQuery(), filmMapper, directorId);
         }
         films.forEach(f -> f.setDirectors(getDirectorsByFilm(f)));
         films.forEach(f -> f.setGenres(genreStorage.getFilmGenres(f.getId())));
@@ -96,23 +86,23 @@ public class DbDirectorStorage implements DirectorStorage {
 
     @Override
     public List<Director> getDirectorsByFilm(Film film) {
-        List<Integer> id = directors.queryForList(SELECT_DIRECTORS_BY_FILM_SQL_QUERY, Integer.class, film.getId());
-        return id.stream().map(this::getDirector).collect(Collectors.toList());
+        List<Integer> id = directors.queryForList(SELECT_DIRECTORS_BY_FILM.getSqlQuery(), Integer.class, film.getId());
+        return id.stream().map(this::getDirectorById).collect(Collectors.toList());
     }
 
     @Override
     public void createDirectorByFilm(Long filmId, Integer directorId) {
-        directors.update(INSERT_INTO_FILM_DIRECTORS_SQL_QUERY, filmId, directorId);
+        directors.update(INSERT_INTO_FILM_DIRECTORS.getSqlQuery(), filmId, directorId);
     }
 
     @Override
     public void deleteDirectorFromOneFilm(Integer id) {
-        directors.update(DELETE_DIRECTOR_FROM_ONE_FILM_SQL_QUERY, id);
+        directors.update(DELETE_DIRECTOR_FROM_ONE_FILM.getSqlQuery(), id);
     }
 
     @Override
     public boolean contains(Integer directorId) {
-        return getDirector(directorId) != null;
+        return directors.queryForObject(CONTAINS.getSqlQuery(), Boolean.TYPE, directorId);
     }
 
 

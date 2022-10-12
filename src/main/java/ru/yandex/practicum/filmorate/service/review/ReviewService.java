@@ -2,11 +2,15 @@ package ru.yandex.practicum.filmorate.service.review;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.base.DevelopmentException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
 import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.DbReviewStorage;
+import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
 
 import java.util.List;
@@ -17,20 +21,29 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ReviewService {
-    private final DbFilmStorage dbFilmStorage;
-    private final DbUserStorage dbUserStorage;
-    private final DbReviewStorage dbReviewStorage;
+    private final DataStorage<Film> filmStorage;
+    private final DataStorage<User> userStorage;
+    private final ReviewStorage reviewStorage;
 
     private final Integer defaultCountReview = 10;
 
+    public ReviewService(DbFilmStorage filmStorage, DbUserStorage userStorage, DbReviewStorage reviewStorage) {
+        this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
+        this.reviewStorage = reviewStorage;
+    }
+
     // Добавление нового отзыва
     public Review createReview(Review review) {
-        checkingForExistenceUser(review.getUserId());
-        checkingForExistenceFilm(review.getFilmId());
-        log.info("Создание отзыва: {}", review);
-        return dbReviewStorage.createReview(review);
+        if (dataIsExist(Film.class, review.getFilmId()) && dataIsExist(User.class, review.getUserId())) {
+            log.info("Создание отзыва: {}", review);
+            return reviewStorage.createReview(review);
+        } else if (!dataIsExist(Film.class, review.getFilmId())) {
+            throw new DataObjectNotFoundException(review.getFilmId());
+        } else {
+            throw new DataObjectNotFoundException(review.getUserId());
+        }
     }
 
     // Получение всех отзывов по идентификатору фильма, если фильм не указан, то все. Если кол-во не указано, то 10.
@@ -40,85 +53,105 @@ public class ReviewService {
         }
         if (filmId == null) {
             log.info("Получение списка из {} отзывов:", count);
-            return dbReviewStorage.getReview(count);
+            return reviewStorage.getReview(count);
         } else {
-            checkingForExistenceFilm(filmId);
-            log.info("Получение списка из {} отзывов для фильма с ИД: {}", count, filmId);
-            return dbReviewStorage.getReviewByFilmId(filmId, count);
+            if (dataIsExist(Film.class, filmId)) {
+                log.info("Получение списка из {} отзывов для фильма с ИД: {}", count, filmId);
+                return reviewStorage.getReviewByFilmId(filmId, count);
+            } else {
+                throw new DataObjectNotFoundException(filmId);
+            }
         }
     }
 
     // Получение отзыва по идентификатору
     public Review getReviewById(Long reviewId) {
-        checkingForExistenceReview(reviewId);
-        log.info("Получение отзыва по ИД: {}", reviewId);
-        return dbReviewStorage.getReviewById(reviewId);
-    }
-
-    // Редактирование уже имеющегося отзыва
-    public Review updateReview(Review review) {
-        checkingForExistenceReview(review.getReviewId());
-        log.info("Редактирование уже имеющегося отзыва: {}", review);
-        return dbReviewStorage.updateReview(review);
-    }
-
-    // Удаление уже имеющегося отзыва по идентификатору
-    public void deleteReviewById(Long reviewId) {
-        checkingForExistenceReview(reviewId);
-        log.info("Удаление уже имеющегося отзыва c ИД: {}", reviewId);
-        dbReviewStorage.deleteReviewById(reviewId);
-    }
-
-    // Пользователь ставит лайк отзыву
-    public void likeReview(Long reviewId, Long userId) {
-        checkingForExistenceReview(reviewId);
-        checkingForExistenceUser(userId);
-        log.info("Пользователь: {} ставит лайк отзыву: {}", userId, reviewId);
-        dbReviewStorage.likeReview(reviewId, userId);
-    }
-
-    // Пользователь ставит дизлайк отзыву
-    public void dislikeReview(Long reviewId, Long userId) {
-        checkingForExistenceReview(reviewId);
-        checkingForExistenceUser(userId);
-        log.info("Пользователь: {} ставит дизлайк отзыву: {}", userId, reviewId);
-        dbReviewStorage.dislikeReview(reviewId, userId);
-    }
-
-    // Пользователь удаляет лайк отзыву
-    public void deleteLikeReview(Long reviewId, Long userId) {
-        checkingForExistenceReview(reviewId);
-        checkingForExistenceUser(userId);
-        log.info("Пользователь: {} удаляет лайк отзыву: {}", userId, reviewId);
-        dbReviewStorage.deleteLikeReview(reviewId, userId);
-    }
-
-    // Пользователь удаляет дизлайк отзыву
-    public void deleteDislikeReview(Long reviewId, Long userId) {
-        checkingForExistenceReview(reviewId);
-        checkingForExistenceUser(userId);
-        log.info("Пользователь: {} удаляет дизлайк отзыву: {}", userId, reviewId);
-        dbReviewStorage.deleteDislikeReview(reviewId, userId);
-    }
-
-    // проверка на существование отзыва по идентификатору
-    private void checkingForExistenceReview(Long reviewId) {
-        if (!dbReviewStorage.contains(reviewId)) {
+        if (dataIsExist(Review.class, reviewId)) {
+            log.info("Получение отзыва по ИД: {}", reviewId);
+            return reviewStorage.getReviewById(reviewId);
+        } else {
             throw new DataObjectNotFoundException(reviewId);
         }
     }
 
-    // проверка на существование фильма по идентификатору
-    private void checkingForExistenceFilm(Long filmId) {
-        if (!dbFilmStorage.contains(filmId)) {
-            throw new DataObjectNotFoundException(filmId);
+    // Редактирование уже имеющегося отзыва
+    public Review updateReview(Review review) {
+        if (dataIsExist(review.getClass(), review.getReviewId())) {
+            log.info("Редактирование уже имеющегося отзыва: {}", review);
+            return reviewStorage.updateReview(review);
+        } else {
+            throw new DataObjectNotFoundException(review.getReviewId());
         }
     }
 
-    // проверка на существование пользователя по идентификатору
-    private void checkingForExistenceUser(Long userId) {
-        if (!dbUserStorage.contains(userId)) {
+    // Удаление уже имеющегося отзыва по идентификатору
+    public void deleteReviewById(Long reviewId) {
+        if (dataIsExist(Review.class, reviewId)) {
+            log.info("Удаление уже имеющегося отзыва c ИД: {}", reviewId);
+            reviewStorage.deleteReviewById(reviewId);
+        } else {
+            throw new DataObjectNotFoundException(reviewId);
+        }
+    }
+
+    // Пользователь ставит лайк отзыву
+    public void likeReview(Long reviewId, Long userId) {
+        if (dataIsExist(Review.class, reviewId) && dataIsExist(User.class, userId)) {
+            log.info("Пользователь: {} ставит лайк отзыву: {}", userId, reviewId);
+            reviewStorage.likeReview(reviewId, userId);
+        } else if (!dataIsExist(Review.class, reviewId)) {
+            throw new DataObjectNotFoundException(reviewId);
+        } else {
             throw new DataObjectNotFoundException(userId);
+        }
+    }
+
+    // Пользователь ставит дизлайк отзыву
+    public void dislikeReview(Long reviewId, Long userId) {
+        if (dataIsExist(Review.class, reviewId) && dataIsExist(User.class, userId)) {
+            log.info("Пользователь: {} ставит дизлайк отзыву: {}", userId, reviewId);
+            reviewStorage.dislikeReview(reviewId, userId);
+        } else if (!dataIsExist(Review.class, reviewId)) {
+            throw new DataObjectNotFoundException(reviewId);
+        } else {
+            throw new DataObjectNotFoundException(userId);
+        }
+    }
+
+    // Пользователь удаляет лайк отзыву
+    public void deleteLikeReview(Long reviewId, Long userId) {
+        if (dataIsExist(Review.class, reviewId) && dataIsExist(User.class, userId)) {
+            log.info("Пользователь: {} удаляет лайк отзыву: {}", userId, reviewId);
+            reviewStorage.deleteLikeReview(reviewId, userId);
+        } else if (!dataIsExist(Review.class, reviewId)) {
+            throw new DataObjectNotFoundException(reviewId);
+        } else {
+            throw new DataObjectNotFoundException(userId);
+        }
+    }
+
+    // Пользователь удаляет дизлайк отзыву
+    public void deleteDislikeReview(Long reviewId, Long userId) {
+        if (dataIsExist(Review.class, reviewId) && dataIsExist(User.class, userId)) {
+            log.info("Пользователь: {} удаляет дизлайк отзыву: {}", userId, reviewId);
+            reviewStorage.deleteDislikeReview(reviewId, userId);
+        } else if (!dataIsExist(Review.class, reviewId)) {
+            throw new DataObjectNotFoundException(reviewId);
+        } else {
+            throw new DataObjectNotFoundException(userId);
+        }
+    }
+
+    private <T> boolean dataIsExist(Class<T> clazz, Long id) {
+        if (Review.class.equals(clazz)) {
+            return reviewStorage.contains(id);
+        } else if (User.class.equals(clazz)) {
+            return userStorage.contains(id);
+        } else if (Film.class.equals(clazz)) {
+            return filmStorage.contains(id);
+        } else {
+            log.error("Передан непредусмотренный методом класс: {}", clazz.getName());
+            throw new DevelopmentException();
         }
     }
 }

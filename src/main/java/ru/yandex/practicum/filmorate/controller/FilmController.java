@@ -7,6 +7,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -73,8 +76,8 @@ public class FilmController extends AbstractDataController<Film, FilmService> {
     }
 
     @GetMapping(value = "/search")
-    public ResponseEntity<List<Film>> getFoundFilms(@Valid @RequestParam String query,
-                                                    @Valid @RequestParam List<String> by) {
+    public ResponseEntity<List<Film>> getFoundFilms(@Valid @NotNull @NotBlank @RequestParam String query,
+                                                    @Valid @NotNull @NotEmpty @RequestParam List<String> by) {
         return ResponseEntity.ok(service.getFoundFilms(query,by));
     }
 

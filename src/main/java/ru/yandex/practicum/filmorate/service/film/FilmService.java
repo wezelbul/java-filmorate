@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service.film;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
-import ru.yandex.practicum.filmorate.exception.search.SearchEmptyRequestParamException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -184,13 +183,6 @@ public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
         List<Film> filmList = new ArrayList<>();
         List<Film> allFilms = super.getAll();
         query = query.toLowerCase();
-
-        if (query == null || query.isEmpty()) {
-            throw new SearchEmptyRequestParamException();
-        }
-        if (by == null || by.isEmpty()) {
-            throw new SearchEmptyRequestParamException();
-        }
 
         if (by.size() == 2) {
             filmList.addAll(findFilmByTitle(query, allFilms));

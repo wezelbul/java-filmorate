@@ -4,10 +4,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmAndDirectorExtractor;
 import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
-import ru.yandex.practicum.filmorate.util.UtilReader;
+
+import static ru.yandex.practicum.filmorate.storage.like.LikeRequests.*;
 
 import java.util.List;
 
@@ -15,21 +15,8 @@ import java.util.List;
 public class DbLikeStorage implements LikeStorage {
 
     private final JdbcTemplate filmLikes;
-    private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/film/like/";
-    private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
-    private static final String SELECT_COMMON_FILMS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_common_films.sql");
-    private static final String SELECT_COUNT_LIMIT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_count_limit.sql");
-    private static final String SELECT_COUNT_LIMIT_GENRE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_count_limit_genre.sql");
-    private static final String SELECT_COUNT_LIMIT_YEAR_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_count_limit_year.sql");
-    private static final String SELECT_COUNT_LIMIT_GENRE_YEAR_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_count_limit_genre_year.sql");
-
-    private static final String SELECT_ID_COUNT_LIMIT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_id_count_limit.sql");
-    private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
-    private static final String DELETE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete.sql");
-    private static final String DELETE_ALL_LIKES_OF_FILM_SQL_QUERY = UtilReader.readString(
-            SQL_QUERY_DIR + "delete_all_likes_of_film.sql");
-    private static final String DELETE_ALL_LIKES_OF_USER_SQL_QUERY = UtilReader.readString(
-            SQL_QUERY_DIR + "delete_all_likes_of_user.sql");
+    private final FilmExtractor filmExtractor = new FilmExtractor();
+    private final FilmAndDirectorExtractor filmAndDirectorExtractor = new FilmAndDirectorExtractor();
 
     public DbLikeStorage(JdbcTemplate filmLikes) {
         this.filmLikes = filmLikes;
@@ -38,60 +25,60 @@ public class DbLikeStorage implements LikeStorage {
 
     @Override
     public List<Long> getValue(Long filmId) {
-        return filmLikes.queryForList(SELECT_BY_ID_SQL_QUERY, Long.class, filmId);
+        return filmLikes.queryForList(SELECT_BY_ID.getSqlQuery(), Long.class, filmId);
     }
 
     @Override
     public boolean addLink(Long filmId, Long userId) throws DataIntegrityViolationException {
-        filmLikes.update(INSERT_SQL_QUERY, filmId, userId);
+        filmLikes.update(INSERT.getSqlQuery(), filmId, userId);
         return true;
     }
 
     @Override
     public boolean deleteLink(Long filmId, Long userId) {
-        filmLikes.update(DELETE_SQL_QUERY, filmId, userId);
+        filmLikes.update(DELETE.getSqlQuery(), filmId, userId);
         return true;
     }
 
     @Override
     public List<Long> getMostPopularObjectId(Integer count) {
-        return filmLikes.queryForList(SELECT_ID_COUNT_LIMIT_SQL_QUERY, Long.class, count);
+        return filmLikes.queryForList(SELECT_ID_COUNT_LIMIT.getSqlQuery(), Long.class, count);
     }
 
     @Override
     public List<Film> getMostPopularFilms(Integer count) {
-        return filmLikes.query(SELECT_COUNT_LIMIT_SQL_QUERY, new FilmAndDirectorExtractor(), count);
+        return filmLikes.query(SELECT_COUNT_LIMIT.getSqlQuery(), filmAndDirectorExtractor, count);
     }
 
     @Override
     public List<Film> getMostPopularFilmsGenre(Integer count, Integer genreId) {
-        return filmLikes.query(SELECT_COUNT_LIMIT_GENRE_SQL_QUERY, new FilmExtractor(), count, genreId);
+        return filmLikes.query(SELECT_COUNT_LIMIT_GENRE.getSqlQuery(), filmExtractor, count, genreId);
     }
 
     @Override
     public List<Film> getMostPopularFilmsYear(Integer count, Integer year) {
-        return filmLikes.query(SELECT_COUNT_LIMIT_YEAR_SQL_QUERY, new FilmExtractor(), count, year);
+        return filmLikes.query(SELECT_COUNT_LIMIT_YEAR.getSqlQuery(), filmExtractor, count, year);
     }
 
     @Override
     public List<Film> getMostPopularFilmsGenreYear(Integer count, Integer genreId, Integer year) {
-        return filmLikes.query(SELECT_COUNT_LIMIT_GENRE_YEAR_SQL_QUERY, new FilmExtractor(), count, genreId, year);
+        return filmLikes.query(SELECT_COUNT_LIMIT_GENRE_YEAR.getSqlQuery(), filmExtractor, count, genreId, year);
     }
 
     @Override
     public List<Film> getMostCommonFilms(Long userId, Long friendId) {
-        return filmLikes.query(SELECT_COMMON_FILMS_SQL_QUERY, new FilmExtractor(), userId, friendId);
+        return filmLikes.query(SELECT_COMMON_FILMS.getSqlQuery(), filmExtractor, userId, friendId);
     }
 
     @Override
     public boolean deleteAllLikesOfFilm(Long filmId) {
-        filmLikes.update(DELETE_ALL_LIKES_OF_FILM_SQL_QUERY, filmId);
+        filmLikes.update(DELETE_ALL_LIKES_OF_FILM.getSqlQuery(), filmId);
         return true;
     }
 
     @Override
     public boolean deleteAllLikesOfUser(Long idUser) {
-        filmLikes.update(DELETE_ALL_LIKES_OF_USER_SQL_QUERY, idUser);
+        filmLikes.update(DELETE_ALL_LIKES_OF_USER.getSqlQuery(), idUser);
         return false;
     }
 

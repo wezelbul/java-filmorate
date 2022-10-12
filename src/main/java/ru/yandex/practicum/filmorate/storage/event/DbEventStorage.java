@@ -4,7 +4,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.storage.mapper.EventMapper;
-import ru.yandex.practicum.filmorate.util.UtilReader;
+
+import static ru.yandex.practicum.filmorate.storage.event.EventRequests.*;
 
 import java.util.List;
 
@@ -12,13 +13,7 @@ import java.util.List;
 public class DbEventStorage implements EventStorage {
 
     private final JdbcTemplate events;
-    private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/event/";
-    private static final String SELECT_BY_USER_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_user_id.sql");
-    private static final String SELECT_BY_EVENT_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_event_id.sql");
-    private static final String SELECT_EVENT_TYPES_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_types.sql");
-    private static final String SELECT_EVENT_OPERATIONS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_operations.sql");
-    private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
-    private static final String DELETE_BY_USER_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete_by_user_id.sql");
+    private final EventMapper eventMapper = new EventMapper();
 
     public DbEventStorage(JdbcTemplate events) {
         this.events = events;
@@ -26,17 +21,17 @@ public class DbEventStorage implements EventStorage {
 
     @Override
     public List<Event> getUserEvents(Long userId) {
-        return events.query(SELECT_BY_USER_ID_SQL_QUERY, new EventMapper(), userId);
+        return events.query(SELECT_BY_USER_ID.getSqlQuery(), eventMapper, userId);
     }
 
     @Override
     public Event getEventByEventId(Long eventId) {
-        return events.query(SELECT_BY_EVENT_ID_SQL_QUERY, new EventMapper(), eventId).stream().findAny().orElse(null);
+        return events.query(SELECT_BY_EVENT_ID.getSqlQuery(), eventMapper, eventId).stream().findAny().orElse(null);
     }
 
     @Override
     public void addEvent(Long userId, Long entityId, String eventType, String operation, Long timestamp) {
-        events.update(INSERT_SQL_QUERY,
+        events.update(INSERT.getSqlQuery(),
                 userId,
                 entityId,
                 eventType,
@@ -46,16 +41,16 @@ public class DbEventStorage implements EventStorage {
 
     @Override
     public void deleteEventsByUserId(Long userId) {
-        events.update(DELETE_BY_USER_ID_SQL_QUERY, userId);
+        events.update(DELETE_BY_USER_ID.getSqlQuery(), userId);
     }
 
     @Override
     public List<String> getEventTypes() {
-        return events.queryForList(SELECT_EVENT_TYPES_SQL_QUERY, String.class);
+        return events.queryForList(SELECT_EVENT_TYPES.getSqlQuery(), String.class);
     }
 
     @Override
     public List<String> getEventOperations() {
-        return events.queryForList(SELECT_EVENT_OPERATIONS_SQL_QUERY, String.class);
+        return events.queryForList(SELECT_EVENT_OPERATIONS.getSqlQuery(), String.class);
     }
 }
