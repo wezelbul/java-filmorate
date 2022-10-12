@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmAndDirectorExtractor;
 import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 
@@ -59,7 +60,7 @@ public class DbLikeStorage implements LikeStorage {
 
     @Override
     public List<Film> getMostPopularFilms(Integer count) {
-        return filmLikes.query(SELECT_COUNT_LIMIT_SQL_QUERY, new FilmExtractor(), count);
+        return filmLikes.query(SELECT_COUNT_LIMIT_SQL_QUERY, new FilmAndDirectorExtractor(), count);
     }
 
     @Override
