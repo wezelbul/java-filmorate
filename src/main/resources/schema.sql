@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS films, users, film_likes, user_friends, film_genres, reviews, reviews_likes,directors,film_directors;
-
 SET MODE MySQL;
 
 DROP TABLE IF EXISTS films, users, reviews, directors, events,
@@ -110,5 +108,6 @@ CREATE TABLE IF NOT EXISTS events
     entity_id LONG NOT NULL,
     event_type VARCHAR(200) NOT NULL REFERENCES event_types(event_type),
     event_operation VARCHAR(200) NOT NULL REFERENCES event_operations(event_operation),
-    timestamp LONG NOT NULL
+    timestamp LONG NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
 );
