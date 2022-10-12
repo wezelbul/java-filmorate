@@ -11,8 +11,10 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.base.data.AbstractDataService;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
 import ru.yandex.practicum.filmorate.storage.director.DbDirectorStorage;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
 import ru.yandex.practicum.filmorate.storage.genre.DbGenreStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.like.DbLikeStorage;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.DbUserStorage;
@@ -25,11 +27,9 @@ import java.util.stream.Collectors;
 public class FilmService extends AbstractDataService<Film, DbFilmStorage> {
 
     private final DataStorage<User> userStorage;
-
     private final LikeStorage likeStorage;
-    private final DbGenreStorage genreStorage;
-
-    private final DbDirectorStorage directorStorage;
+    private final GenreStorage genreStorage;
+    private final DirectorStorage directorStorage;
 
     private final Integer defaultCountPopularFilms = 10;
 

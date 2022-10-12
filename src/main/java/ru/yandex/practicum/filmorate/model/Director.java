@@ -6,13 +6,10 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
 
-
-
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class Director {
-
 
     Integer id;
     @NotBlank

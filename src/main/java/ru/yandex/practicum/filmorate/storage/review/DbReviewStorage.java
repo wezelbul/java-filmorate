@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 @Repository
@@ -24,6 +25,8 @@ public class DbReviewStorage implements ReviewStorage {
     private static final String R_SELECT_SQL_QUERY = UtilReader.readString(R_SQL_QUERY_DIR + "select.sql");
     private static final String R_SELECT_BY_REVIEW_ID_SQL_QUERY = UtilReader.readString(
             R_SQL_QUERY_DIR + "select_by_review_id.sql");
+    private static final String R_SELECT_BY_USER_ID_FILM_ID_SQL_QUERY = UtilReader.readString(
+            R_SQL_QUERY_DIR + "select_by_user_id_film_id.sql");
     private static final String R_SELECT_BY_FILM_ID_SQL_QUERY = UtilReader.readString(
             R_SQL_QUERY_DIR + "select_by_film_id.sql");
     private static final String R_UPDATE_SQL_QUERY = UtilReader.readString(R_SQL_QUERY_DIR + "update.sql");
@@ -51,7 +54,7 @@ public class DbReviewStorage implements ReviewStorage {
     public Review createReview(Review review) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         reviews.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(R_INSERT_SQL_QUERY, new String[]{"review_id"});
+            PreparedStatement stmt = connection.prepareStatement(R_INSERT_SQL_QUERY, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, review.getContent());
             stmt.setBoolean(2, review.getIsPositive());
             stmt.setLong(3, review.getUserId());
@@ -60,7 +63,7 @@ public class DbReviewStorage implements ReviewStorage {
             return stmt;
         }, keyHolder);
 
-        return getReviewById((Long) keyHolder.getKey());
+        return getReviewById(keyHolder.getKey().longValue());
     }
 
     // Получение определённого количество отзывов
@@ -75,6 +78,12 @@ public class DbReviewStorage implements ReviewStorage {
         List<Review> review = reviews.query(R_SELECT_BY_REVIEW_ID_SQL_QUERY, DbReviewStorage::makeReview, reviewId);
 
         return review.stream().findAny().orElse(null);
+    }
+
+    @Override
+    public Review getReviewByUserIdAndFilmId(Long userId, Long filmId) {
+        return reviews.query(R_SELECT_BY_USER_ID_FILM_ID_SQL_QUERY, DbReviewStorage::makeReview, userId, filmId)
+                .stream().findAny().orElse(null);
     }
 
     // Получение определённое количество отзывов по идентификатору фильма

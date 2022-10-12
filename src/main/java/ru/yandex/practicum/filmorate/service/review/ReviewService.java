@@ -48,8 +48,6 @@ public class ReviewService {
         }
     }
 
-
-
     // Получение отзыва по идентификатору
     public Review getReviewById(Long reviewId) {
         checkingForExistenceReview(reviewId);

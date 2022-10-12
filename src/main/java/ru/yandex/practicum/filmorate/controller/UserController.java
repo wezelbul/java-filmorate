@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
@@ -66,6 +67,11 @@ public class UserController extends AbstractDataController<User, UserService> {
     @DeleteMapping(value = "/{id}/friends/{userId}")
     public Map<String, Boolean> deleteFriend(@Valid @PathVariable Long id, @Valid @PathVariable Long userId) {
         return Map.of("completed", service.deleteFriend(id, userId));
+    }
+
+    @GetMapping(value = "{id}/feed")
+    public ResponseEntity<Collection<Event>> getFeed(@Valid @PathVariable Long id) {
+        return ResponseEntity.ok(service.getFeed(id));
     }
 
     @GetMapping(value = "/popular?count={count}")
