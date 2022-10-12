@@ -87,7 +87,7 @@ public class DbUserStorage implements DataStorage<User> {
 
     @Override
     public boolean delete(Long userId) {
-        users.update(DELETE_SQL_QUERY,userId);
+        users.update(DELETE_SQL_QUERY, userId);
         return true;
     }
 

@@ -5,14 +5,12 @@ import org.aspectj.lang.annotation.*;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.event.EventOperationException;
 import ru.yandex.practicum.filmorate.exception.event.EventTypeException;
-import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.event.DbEventStorage;
 import ru.yandex.practicum.filmorate.storage.event.EventStorage;
 import ru.yandex.practicum.filmorate.storage.review.DbReviewStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 
-import java.time.Instant;
 import java.util.Calendar;
 
 @Component
