@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
@@ -11,6 +12,7 @@ import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -85,6 +87,12 @@ public class UserController extends AbstractDataController<User, UserService> {
     @DeleteMapping(value = "/{id}")
     public void deleteUser (@Valid @PathVariable Long id) {
         service.deleteUser(id);
+    }
+
+    // список фильмов рекомендуемые пользователю
+    @GetMapping(value = "/{id}/recommendations")
+    public List<Film> getUsersRecommendations(@Valid @PathVariable Long id) {
+        return service.getUsersRecommendations(id);
     }
 
 }
