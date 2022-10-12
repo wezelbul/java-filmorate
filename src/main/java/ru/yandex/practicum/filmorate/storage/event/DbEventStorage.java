@@ -18,6 +18,7 @@ public class DbEventStorage implements EventStorage {
     private static final String SELECT_EVENT_TYPES_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_types.sql");
     private static final String SELECT_EVENT_OPERATIONS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_operations.sql");
     private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
+    private static final String DELETE_BY_USER_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete_by_user_id.sql");
 
     public DbEventStorage(JdbcTemplate events) {
         this.events = events;
@@ -41,6 +42,11 @@ public class DbEventStorage implements EventStorage {
                 eventType,
                 operation,
                 timestamp);
+    }
+
+    @Override
+    public void deleteEventsByUserId(Long userId) {
+        events.update(DELETE_BY_USER_ID_SQL_QUERY, userId);
     }
 
     @Override

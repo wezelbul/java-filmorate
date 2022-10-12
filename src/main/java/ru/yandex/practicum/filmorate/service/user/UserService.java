@@ -86,6 +86,7 @@ public class UserService extends AbstractDataService<User, DbUserStorage> {
         }
         friendStorage.deleteAllFriendsOfUser(userId);
         likeStorage.deleteAllLikesOfUser(userId);
+        eventStorage.deleteEventsByUserId(userId);
         return super.delete(userId);
     }
 
