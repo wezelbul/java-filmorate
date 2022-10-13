@@ -8,11 +8,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.DirectorMapper;
-import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmAndDirectorExtractor;
-import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
 
 import static ru.yandex.practicum.filmorate.storage.director.DirectorRequests.*;
 
@@ -26,9 +23,8 @@ import java.util.stream.Collectors;
 public class DbDirectorStorage implements DirectorStorage {
 
     private final JdbcTemplate directors;
-    private final GenreStorage genreStorage;
     private final DirectorMapper directorMapper = new DirectorMapper();
-    private final FilmMapper filmMapper = new FilmMapper();
+    private final FilmAndDirectorExtractor filmAndDirectorExtractor = new FilmAndDirectorExtractor();
 
     @Override
     public List<Director> getDirectorList() {
@@ -77,9 +73,9 @@ public class DbDirectorStorage implements DirectorStorage {
         }
 
         if(order.equals("likes")){
-            return directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE.getSqlQuery(),new FilmAndDirectorExtractor(),directorId);
+            return directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE.getSqlQuery(), filmAndDirectorExtractor, directorId);
         }else{
-            return directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR.getSqlQuery(),new FilmAndDirectorExtractor(),directorId);
+            return directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR.getSqlQuery(), filmAndDirectorExtractor, directorId);
         }
     }
 
