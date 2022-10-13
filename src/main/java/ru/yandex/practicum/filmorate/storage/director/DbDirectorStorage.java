@@ -11,6 +11,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmAndDirectorExtractor;
+import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
 
 import static ru.yandex.practicum.filmorate.storage.director.DirectorRequests.*;
 
@@ -73,15 +75,12 @@ public class DbDirectorStorage implements DirectorStorage {
         if(!contains(directorId)){
             throw new DataObjectNotFoundException(directorId.longValue());
         }
-        List<Film> films;
-        if (order.equals("likes")){
-            films = directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE.getSqlQuery(), filmMapper, directorId);
-        } else {
-            films = directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR.getSqlQuery(), filmMapper, directorId);
+
+        if(order.equals("likes")){
+            return directors.query(SELECT_BY_DIRECTOR_ORDER_BY_RATE.getSqlQuery(),new FilmAndDirectorExtractor(),directorId);
+        }else{
+            return directors.query(SELECT_BY_DIRECTOR_ORDER_BY_YEAR.getSqlQuery(),new FilmAndDirectorExtractor(),directorId);
         }
-        films.forEach(f -> f.setDirectors(getDirectorsByFilm(f)));
-        films.forEach(f -> f.setGenres(genreStorage.getFilmGenres(f.getId())));
-        return films;
     }
 
     @Override
