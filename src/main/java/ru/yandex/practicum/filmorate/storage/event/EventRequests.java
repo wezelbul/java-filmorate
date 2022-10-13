@@ -13,12 +13,16 @@ public enum EventRequests {
 
     private final String SQL_QUERY_DIR = "src/main/resources/sql/query/event/";
     private final String fileName;
+    private String sqlQuery;
 
     EventRequests(String fileName) {
         this.fileName = fileName;
     }
 
     public String getSqlQuery() {
-        return UtilReader.readString(SQL_QUERY_DIR + this.fileName);
+        if (this.sqlQuery == null) {
+            this.sqlQuery = UtilReader.readString(SQL_QUERY_DIR + this.fileName);
+        }
+        return this.sqlQuery;
     }
 }

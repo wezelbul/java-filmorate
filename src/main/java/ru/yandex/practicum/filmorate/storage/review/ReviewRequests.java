@@ -19,12 +19,16 @@ public enum ReviewRequests {
 
     private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/review/";
     private final String fileName;
+    private String sqlQuery;
 
     ReviewRequests(String fileName) {
         this.fileName = fileName;
     }
 
     public String getSqlQuery() {
-        return UtilReader.readString(SQL_QUERY_DIR + this.fileName);
+        if (this.sqlQuery == null) {
+            this.sqlQuery = UtilReader.readString(SQL_QUERY_DIR + this.fileName);
+        }
+        return this.sqlQuery;
     }
 }
