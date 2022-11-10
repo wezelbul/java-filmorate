@@ -4,7 +4,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
-import ru.yandex.practicum.filmorate.util.UtilReader;
+
+import static ru.yandex.practicum.filmorate.storage.genre.GenreRequests.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,13 +16,7 @@ import java.util.Map;
 public class DbGenreStorage implements GenreStorage {
 
     private final JdbcTemplate genres;
-    private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/genre/";
-    private static final String SELECT_ALL_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_all.sql");
-    private static final String SELECT_FILM_GENRES_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_film_genres.sql");
-    private static final String SELECT_GENRES_ALL_FILMS_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_genres_all_films.sql");
-    private static final String DELETE_FILM_GENRES_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "delete_film_genres.sql");
-    private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
-    private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
+    private final GenreMapper genreMapper = new GenreMapper();
 
     public DbGenreStorage(JdbcTemplate genres) {
         this.genres = genres;
@@ -29,22 +24,22 @@ public class DbGenreStorage implements GenreStorage {
 
     @Override
     public List<Genre> getFilmGenres(Long filmId) {
-        return genres.query(SELECT_FILM_GENRES_SQL_QUERY, new GenreMapper(), filmId);
+        return genres.query(SELECT_FILM_GENRES.getSqlQuery(), genreMapper, filmId);
     }
 
     @Override
     public void setGenres(Long filmId, Integer genreId) {
-        genres.update(INSERT_SQL_QUERY, filmId, genreId);
+        genres.update(INSERT.getSqlQuery(), filmId, genreId);
     }
 
     @Override
     public List<Genre> getGenres() {
-        return new ArrayList<>(genres.query(SELECT_ALL_SQL_QUERY, new GenreMapper()));
+        return new ArrayList<>(genres.query(SELECT_ALL.getSqlQuery(), genreMapper));
     }
 
     @Override
     public List<Map<Long, Genre>> getAllFilmsGenres() {
-        return genres.query(SELECT_GENRES_ALL_FILMS_SQL_QUERY,
+        return genres.query(SELECT_GENRES_ALL_FILMS.getSqlQuery(),
                 (rs, rowNum) -> {
                     Map<Long, Genre> result = new HashMap<>();
                     result.put(rs.getLong("film_id"),
@@ -56,17 +51,19 @@ public class DbGenreStorage implements GenreStorage {
 
     @Override
     public Genre getGenre(Integer genreId) {
-        return genres.query(SELECT_BY_ID_SQL_QUERY, new GenreMapper(), genreId)
+        return genres.query(SELECT_BY_ID.getSqlQuery(), genreMapper, genreId)
                 .stream().findAny().orElse(null);
     }
 
     @Override
     public void clearFilmGenres(Long filmId) {
-        genres.update(DELETE_FILM_GENRES_SQL_QUERY, filmId);
+        genres.update(DELETE_FILM_GENRES.getSqlQuery(), filmId);
     }
 
     @Override
     public boolean contains(Integer genreId) {
-        return getGenre(genreId) != null;
+        return genres.queryForObject(CONTAINS.getSqlQuery(), Boolean.TYPE, genreId);
     }
+
+
 }

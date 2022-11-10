@@ -1,0 +1,2 @@
+SELECT event_operation
+FROM event_operations;

@@ -78,5 +78,29 @@ public class DbLikeStorageTest {
         Assertions.assertArrayEquals(new long[]{3L, 2L}, idArray);
     }
 
+    @Test
+    @Tag("SkipCleanup")
+    void getMostPopularFilmsYearTest() {
+        long[] idArray = likeStorage.getMostPopularFilmsYear(10, 1969)
+                .stream().mapToLong(Film::getId).toArray();
+        Assertions.assertEquals(idArray.length, 1);
+        Assertions.assertArrayEquals(new long[]{1L}, idArray);
+    }
+
+    @Test
+    @Tag("SkipCleanup")
+    void getMostPopularFilmsGenreIdTest() {
+        long[] idArray = likeStorage.getMostPopularFilmsGenre(10, 1)
+                .stream().mapToLong(Film::getId).toArray();
+        Assertions.assertArrayEquals(new long[]{3L, 1L}, idArray);
+    }
+
+    @Test
+    @Tag("SkipCleanup")
+    void getMostPopularFilmsGenreIdYearTest() {
+        long[] idArray = likeStorage.getMostPopularFilmsGenreYear(10, 1, 1969)
+                .stream().mapToLong(Film::getId).toArray();
+        Assertions.assertArrayEquals(new long[]{1L}, idArray);
+    }
 
 }

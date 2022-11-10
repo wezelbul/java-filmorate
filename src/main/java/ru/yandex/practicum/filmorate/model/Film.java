@@ -16,30 +16,32 @@ import java.util.List;
 @Slf4j
 public class Film implements DataModel {
 
-    Long id;
+    private Long id;
 
     @NotNull(message = "Name can not be null")
     @NotBlank(message = "Name can not be empty")
-    String name;
+    private String name;
 
     @Size(message = "Description is too long", max = 200)
     @NotBlank(message = "Description can not be empty")
     @NotNull(message = "Description can not be null")
-    String description;
+    private String description;
 
     @NotNull(message = "Release Date can not be null")
     @AfterCinemaBirthday(message = "The film appeared before cinematography")
-    LocalDate releaseDate;
+    private LocalDate releaseDate;
 
     @NotNull(message = "Duration can not be null")
     @Positive(message = "Duration is negative or zero")
-    Integer duration;
+    private Integer duration;
 
     @NotNull(message = "MPA rating can not be null")
-    MpaRating mpa;
+    private MpaRating mpa;
 
-    Long rate;
+    private Long rate;
 
-    List<Genre> genres;
+    private List<Genre> genres;
+
+    private List<Director> directors;
 
 }

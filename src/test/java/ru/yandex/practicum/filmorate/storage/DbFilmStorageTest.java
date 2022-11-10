@@ -7,12 +7,14 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.film.DbFilmStorage;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -29,7 +31,8 @@ public class DbFilmStorageTest {
             220,
             new MpaRating(1, "G"),
             null,
-            new ArrayList<>());
+            new ArrayList<>(List.of(new Genre(1, "Комедия"))),
+            null);
 
     @AfterEach
     void afterEach(TestInfo testInfo) {
@@ -59,7 +62,8 @@ public class DbFilmStorageTest {
                 100,
                 new MpaRating(3, "PG-13"),
                 1L,
-                new ArrayList<>());
+                new ArrayList<>(List.of(new Genre(1, "Комедия"))),
+                null);
         Assertions.assertEquals(film, filmStorage.getById(1L));
     }
 
@@ -79,6 +83,7 @@ public class DbFilmStorageTest {
     void addTest() {
         testFilm.setId(4L);
         testFilm.setRate(0L);
+        testFilm.setGenres(new ArrayList<>());
         Assertions.assertEquals(testFilm, filmStorage.add(testFilm));
     }
 

@@ -7,21 +7,21 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.base.data.DataStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.extractor.FilmExtractor;
 import ru.yandex.practicum.filmorate.util.UtilReader;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.storage.film.FilmRequests.*;
+
 @Repository
 public class DbFilmStorage implements DataStorage<Film> {
 
     private final JdbcTemplate films;
-    private static final String SQL_QUERY_DIR = "src/main/resources/sql/query/film/";
-    private static final String SELECT_ALL_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_all.sql");
-    private static final String SELECT_BY_ID_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "select_by_id.sql");
-    private static final String INSERT_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "insert.sql");
-    private static final String UPDATE_SQL_QUERY = UtilReader.readString(SQL_QUERY_DIR + "update.sql");
+    private final FilmMapper filmMapper = new FilmMapper();
+    private final FilmExtractor filmExtractor = new FilmExtractor();
 
     public DbFilmStorage(JdbcTemplate films) {
         this.films = films;
@@ -29,26 +29,25 @@ public class DbFilmStorage implements DataStorage<Film> {
 
     @Override
     public List<Film> getAll() {
-        return films.query(SELECT_ALL_SQL_QUERY, new FilmMapper());
+        return films.query(SELECT_ALL.getSqlQuery(), filmMapper);
     }
 
     @Override
     public Film getById(Long id) {
-        return films.query(SELECT_BY_ID_SQL_QUERY, new FilmMapper(), id).stream().findAny().orElse(null);
+        return films.query(SELECT_BY_ID.getSqlQuery(), filmExtractor, id).stream().findAny().orElse(null);
     }
 
     @Override
     public boolean contains(Long id) {
-        return getById(id) != null;
+        return films.queryForObject(CONTAINS.getSqlQuery(), Boolean.TYPE, id);
     }
 
     @Override
     public Film add(Film object) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         films.update(connection -> {
-
             PreparedStatement preparedStatement = connection
-                    .prepareStatement(INSERT_SQL_QUERY,
+                    .prepareStatement(INSERT.getSqlQuery(),
                             Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, object.getName());
             preparedStatement.setString(2, object.getDescription());
@@ -64,7 +63,7 @@ public class DbFilmStorage implements DataStorage<Film> {
 
     @Override
     public Film update(Film object) {
-        films.update(UPDATE_SQL_QUERY,
+        films.update(UPDATE.getSqlQuery(),
                 object.getName(),
                 object.getDescription(),
                 Date.valueOf(object.getReleaseDate()),
@@ -74,4 +73,19 @@ public class DbFilmStorage implements DataStorage<Film> {
         return getById(object.getId());
     }
 
+    @Override
+    public boolean delete(Long filmId) {
+        films.update(DELETE.getSqlQuery(),filmId);
+        return true;
+    }
+
+    // Список фильмов пользователя, схожих по интересам
+    public List<Long> getUsersRecommendations(Long id) {
+        return films.queryForList(SELECT_RECOMMENDATIONS_FILMS_ID.getSqlQuery(), Long.class, id, id);
+    }
+
+    // список фильмов которые лайкнул пользователь
+    public List<Long> getFilmsUserById(Long id) {
+        return films.queryForList(SELECT_FAVORITE_FILMS_USER_ID.getSqlQuery(), Long.class, id);
+    }
 }

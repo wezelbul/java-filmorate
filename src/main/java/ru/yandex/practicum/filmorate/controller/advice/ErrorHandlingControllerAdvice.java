@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.base.DataObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.base.DevelopmentException;
+import ru.yandex.practicum.filmorate.exception.event.EventOperationException;
+import ru.yandex.practicum.filmorate.exception.event.EventTypeException;
+import ru.yandex.practicum.filmorate.model.Event;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
@@ -35,6 +38,12 @@ public class ErrorHandlingControllerAdvice {
     public ResponseEntity<Response> sqlSyntaxErrorException() {
         Response response = new Response("Sorry about it, we are work to be better");
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler({EventTypeException.class, EventOperationException.class})
+    public ResponseEntity<Response> eventTypeOrOperationException(Exception exception) {
+        Response response = new Response(exception.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ResponseBody
